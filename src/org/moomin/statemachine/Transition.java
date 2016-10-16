@@ -6,44 +6,39 @@ public class Transition {
 	
 	private State toState;
 	
-	private Class<?> eventClass;
+	private Class<? extends Event> eventClass;
 	
-	private Constraint constraint;
+	private TransitionConstraint guard;
 	
 	public Transition(State fromState, State toState, 
 			Class<? extends Event> eventClass) {
-		this.fromState = fromState;
-		this.toState = toState;
-		this.eventClass = eventClass;
-		this.constraint = new Constraint() {
-			@Override
-			public boolean evaluate(Event event) {
-				return true;
-			}
-		};
+		this(fromState, toState, eventClass, event -> true);
 	}
 
 	public Transition(State fromState, State toState, 
 			Class<? extends Event> eventClass,
-			Constraint constraint) {
-		this(fromState, toState, eventClass);
-		this.constraint = constraint;
+			TransitionConstraint constraint) {
+		
+		this.fromState = fromState;
+		this.toState = toState;
+		this.eventClass = eventClass;
+		this.guard = constraint;
 	}
 
-	public State getFromState() {
+	public State fromState() {
 		return fromState;
 	}
 
-	public State getToState() {
+	public State toState() {
 		return toState;
 	}
 	
-	public Class<?> getEventClass() {
+	public Class<? extends Event> triggeredBy() {
 		return eventClass;
 	}
 
-	public boolean evaluateContraint(Event event) {
-		return constraint.evaluate(event);
+	public boolean evaluateGuardFor(Event event) {
+		return guard.evaluate(event);
 	}
 
 

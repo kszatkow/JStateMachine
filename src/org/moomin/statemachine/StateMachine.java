@@ -26,7 +26,7 @@ public class StateMachine {
 	}
 
 	public void addTransition(Transition transition) {
-		transitions.put(transition.getFromState(), transition);
+		transitions.put(transition.fromState(), transition);
 	}
 
 	public State getCurrentState() {
@@ -35,12 +35,18 @@ public class StateMachine {
 
 	public void processEvent(Event event) {
 		Transition transition = transitions.get(currentState);
+		// TODO handle multiple transitions from one state
 		if (transition != null) {
-			if(transition.getEventClass().equals(event.getClass()) 
-					&& transition.evaluateContraint(event) ) {
-				currentState = transition.getToState();
+			if(isTransitionPossible(event, transition) ) {
+				// TODO what if toState is not in the state machine?
+				currentState = transition.toState();
 			}
 		}
+	}
+
+	private boolean isTransitionPossible(Event event, Transition transition) {
+		return transition.triggeredBy().isInstance(event) 
+				&& transition.evaluateGuardFor(event);
 	}
 
 }
