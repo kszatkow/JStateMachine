@@ -4,8 +4,6 @@ import org.moomin.statemachine.State;
 
 public class EvenState implements State {
 
-	public EvenState(String string) {
-		// TODO Auto-generated constructor stub
-	}
+	public EvenState(String string) {}
 
 }
