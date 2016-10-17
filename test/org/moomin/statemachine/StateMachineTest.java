@@ -2,8 +2,16 @@ package org.moomin.statemachine;
 
 import static org.junit.Assert.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.moomin.statemachine.idleactive.ActiveState;
+import org.moomin.statemachine.idleactive.IdleState;
+import org.moomin.statemachine.idleactive.IdleTimeoutEvent;
+import org.moomin.statemachine.idleactive.KeyWakeupEvent;
+import org.moomin.statemachine.idleactive.MouseWakeupEvent;
 import org.moomin.statemachine.oddeven.EvenNumberConstraint;
 import org.moomin.statemachine.oddeven.EvenNumberEvent;
 import org.moomin.statemachine.oddeven.EvenState;
@@ -163,6 +171,38 @@ public class StateMachineTest {
 		// turn off
 		sendEventAndCheckCurrentState(new OffEvent() , offState);
 		assertEquals(false, offOnSwitch.isOn());
+	}
+	
+	@Test
+	public void transitionWithMultipleTriggersTest() {
+		State idleState = addState(new IdleState("Idle"));
+		State activeState = addState(new ActiveState("Active"));
+		
+		Set<Class<? extends Event>> triggerableBy = new HashSet<>();
+		triggerableBy.add(KeyWakeupEvent.class);
+		triggerableBy.add(MouseWakeupEvent.class);
+		stateMachine.addTransition(
+				new Transition(idleState, activeState, triggerableBy));
+		stateMachine.addTransition(
+				new Transition(activeState, idleState, IdleTimeoutEvent.class));
+				
+		stateMachine.setInitialState(idleState);
+		
+		// check initial state
+		assertSame(idleState, stateMachine.getActiveState());	
+		
+		// idle -> idle
+		sendEventAndCheckCurrentState(new IdleTimeoutEvent() , idleState);		
+		// idle -> active (key event)
+		sendEventAndCheckCurrentState(new KeyWakeupEvent() , activeState);
+		// active -> idle
+		sendEventAndCheckCurrentState(new IdleTimeoutEvent() , idleState);	
+		// idle -> active (mouse event)
+		sendEventAndCheckCurrentState(new MouseWakeupEvent() , activeState);
+		// active -> idle
+		sendEventAndCheckCurrentState(new IdleTimeoutEvent() , idleState);	
+		// no transition - unhandled event
+		sendEventAndCheckCurrentState(new UnhandledEvent() , idleState);
 	}
 	
 	private State addState(State state) {

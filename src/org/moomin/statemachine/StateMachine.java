@@ -42,7 +42,6 @@ public class StateMachine {
 	public void processEvent(Event event) {
 		List<Transition> outgoingFromActiveState = transitions.get(activeState);
 		for (Transition transition : outgoingFromActiveState) {
-			// TODO what if multiple transitions are enabled?
 			if( isTransitionEnabled(event, transition) ) {
 				// TODO what if toState is not in the state machine? - this should not happen - such transitions should not be accepted
 				transition.takeEffect();
@@ -53,7 +52,7 @@ public class StateMachine {
 	}
 
 	private boolean isTransitionEnabled(Event event, Transition transition) {
-		return transition.triggeredBy().isInstance(event) 
+		return transition.isTriggerableBy(event) 
 				&& transition.evaluateGuardFor(event);
 	}
 
