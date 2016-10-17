@@ -9,6 +9,8 @@ public class Transition {
 	private Class<? extends Event> eventClass;
 	
 	private TransitionConstraint guard;
+
+	private TransitionEffect effect;
 	
 	public Transition(State source, State target, 
 			Class<? extends Event> eventClass) {
@@ -18,11 +20,17 @@ public class Transition {
 	public Transition(State source, State target, 
 			Class<? extends Event> eventClass,
 			TransitionConstraint guard) {
-		
 		this.source = source;
 		this.target = target;
 		this.eventClass = eventClass;
 		this.guard = guard;
+		effect = () -> {};
+	}
+
+	public Transition(State source, State target, 
+			Class<? extends Event> eventClass, TransitionEffect effect) {
+		this(source, target, eventClass, event -> true);
+		this.effect = effect;
 	}
 
 	public State source() {
@@ -41,5 +49,8 @@ public class Transition {
 		return guard.evaluate(event);
 	}
 
+	public void takeEffect() {
+		effect.execute();
+	}
 
 }

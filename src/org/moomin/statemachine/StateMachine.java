@@ -45,6 +45,7 @@ public class StateMachine {
 			// TODO what is multiple transitions are enabled?
 			if( isTransitionEnabled(event, transition) ) {
 				// TODO what if toState is not in the state machine? - this should not happen - such transitions should not be accepted
+				transition.takeEffect();
 				activeState = transition.target();
 				break ;
 			}

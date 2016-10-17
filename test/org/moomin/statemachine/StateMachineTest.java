@@ -17,6 +17,9 @@ import org.moomin.statemachine.onoff.OffEvent;
 import org.moomin.statemachine.onoff.OffState;
 import org.moomin.statemachine.onoff.OnEvent;
 import org.moomin.statemachine.onoff.OnState;
+import org.moomin.statemachine.onoff.Switch;
+import org.moomin.statemachine.onoff.TurnOffEffect;
+import org.moomin.statemachine.onoff.TurnOnEffect;
 
 public class StateMachineTest {
 
@@ -128,6 +131,38 @@ public class StateMachineTest {
 		sendEventAndCheckCurrentState(new EvenNumberEvent() , evenState);
 		// even -> odd
 		sendEventAndCheckCurrentState(new OddNumberEvent() , oddState);
+	}
+	
+	@Test
+	public void transitionEffectTest() {
+		State offState = addState(new OffState("Off"));
+		State onState = addState(new OnState("On"));
+		
+		Switch offOnSwitch = new Switch();
+		TurnOnEffect turnOnEffect = new TurnOnEffect(offOnSwitch);
+		stateMachine.addTransition(
+				new Transition(offState, onState, OnEvent.class, turnOnEffect));
+		TurnOffEffect turnOffEffect = new TurnOffEffect(offOnSwitch);
+		stateMachine.addTransition(
+				new Transition(onState, offState, OffEvent.class, turnOffEffect));
+				
+		stateMachine.setInitialState(offState);
+		
+		// check initial state
+		assertSame(offState, stateMachine.getActiveState());	
+		assertEquals(false, offOnSwitch.isOn());
+		
+		// turn off
+		sendEventAndCheckCurrentState(new OffEvent() , offState);
+		assertEquals(false, offOnSwitch.isOn());
+		
+		// turn on
+		sendEventAndCheckCurrentState(new OnEvent() , onState);
+		assertEquals(true, offOnSwitch.isOn());
+
+		// turn off
+		sendEventAndCheckCurrentState(new OffEvent() , offState);
+		assertEquals(false, offOnSwitch.isOn());
 	}
 	
 	private State addState(State state) {
