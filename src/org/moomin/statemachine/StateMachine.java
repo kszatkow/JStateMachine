@@ -8,9 +8,7 @@ import java.util.Map;
 
 public class StateMachine {
 
-	private State initialState;
-
-	private State currentState;
+	private State activeState;
 	
 	private List<State> states = new ArrayList<State>();
 	
@@ -21,40 +19,39 @@ public class StateMachine {
 		states.add(state);
 	}
 
-	public void setInitialState(State state) {
-		initialState = state;
-		currentState = initialState;
+	public void setInitialState(State initialState) {
+		activeState = initialState;
 	}
 
 	public void addTransition(Transition transition) {
-		if (transitions.containsKey(transition.fromState())) {
-			List<Transition> transitionsFromState = transitions.get(transition.fromState());
+		State sourceState = transition.source();
+		if (transitions.containsKey(sourceState)) {
+			List<Transition> transitionsFromState = transitions.get(sourceState);
 			transitionsFromState.add(transition);
 		} else {
 			List<Transition> transitionsFromState = new LinkedList<>();
 			transitionsFromState.add(transition);
-			transitions.put(transition.fromState(), transitionsFromState);
+			transitions.put(sourceState, transitionsFromState);
 		}
 	}
 
-	public State getCurrentState() {
-		return currentState;
+	public State getActiveState() {
+		return activeState;
 	}
 
 	public void processEvent(Event event) {
-		List<Transition> transitionsFromCurrentState = transitions.get(currentState);
-		if (!transitionsFromCurrentState.isEmpty()) {
-			for (Transition transition : transitionsFromCurrentState) {
-				if(isTransitionPossible(event, transition) ) {
-					// TODO what if toState is not in the state machine?
-					currentState = transition.toState();
-					break ;
-				}
+		List<Transition> outgoingFromActiveState = transitions.get(activeState);
+		for (Transition transition : outgoingFromActiveState) {
+			// TODO what is multiple transitions are enabled?
+			if( isTransitionEnabled(event, transition) ) {
+				// TODO what if toState is not in the state machine? - this should not happen - such transitions should not be accepted
+				activeState = transition.target();
+				break ;
 			}
 		}
 	}
 
-	private boolean isTransitionPossible(Event event, Transition transition) {
+	private boolean isTransitionEnabled(Event event, Transition transition) {
 		return transition.triggeredBy().isInstance(event) 
 				&& transition.evaluateGuardFor(event);
 	}

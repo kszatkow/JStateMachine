@@ -40,7 +40,7 @@ public class StateMachineTest {
 		stateMachine.setInitialState(offState);
 		
 		// check initial state
-		assertSame(offState, stateMachine.getCurrentState());
+		assertSame(offState, stateMachine.getActiveState());
 	
 		// check on state transitions
 		sendEventAndCheckCurrentState(new OnEvent() , onState);
@@ -70,7 +70,7 @@ public class StateMachineTest {
 		stateMachine.setInitialState(oddState);
 		
 		// check initial state
-		assertSame(oddState, stateMachine.getCurrentState());
+		assertSame(oddState, stateMachine.getActiveState());
 		
 		// check odd state transitions
 		sendEventAndCheckCurrentState(new FeedNumberEvent(11) , oddState);
@@ -105,7 +105,7 @@ public class StateMachineTest {
 		stateMachine.setInitialState(zeroState);
 		
 		// check initial state
-		assertSame(zeroState, stateMachine.getCurrentState());
+		assertSame(zeroState, stateMachine.getActiveState());
 	
 		// check transitions
 		// zero -> zero
@@ -137,6 +137,6 @@ public class StateMachineTest {
 	
 	private void sendEventAndCheckCurrentState(Event event, State expectedState) {
 		stateMachine.processEvent(event);
-		assertSame(expectedState, stateMachine.getCurrentState());
+		assertSame(expectedState, stateMachine.getActiveState());
 	}
 }

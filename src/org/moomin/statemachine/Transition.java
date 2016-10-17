@@ -2,35 +2,35 @@ package org.moomin.statemachine;
 
 public class Transition {
 
-	private State fromState;
+	private State source;
 	
-	private State toState;
+	private State target;
 	
 	private Class<? extends Event> eventClass;
 	
 	private TransitionConstraint guard;
 	
-	public Transition(State fromState, State toState, 
+	public Transition(State source, State target, 
 			Class<? extends Event> eventClass) {
-		this(fromState, toState, eventClass, event -> true);
+		this(source, target, eventClass, event -> true);
 	}
 
-	public Transition(State fromState, State toState, 
+	public Transition(State source, State target, 
 			Class<? extends Event> eventClass,
-			TransitionConstraint constraint) {
+			TransitionConstraint guard) {
 		
-		this.fromState = fromState;
-		this.toState = toState;
+		this.source = source;
+		this.target = target;
 		this.eventClass = eventClass;
-		this.guard = constraint;
+		this.guard = guard;
 	}
 
-	public State fromState() {
-		return fromState;
+	public State source() {
+		return source;
 	}
 
-	public State toState() {
-		return toState;
+	public State target() {
+		return target;
 	}
 	
 	public Class<? extends Event> triggeredBy() {
