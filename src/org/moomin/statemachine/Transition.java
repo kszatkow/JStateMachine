@@ -8,31 +8,37 @@ public class Transition {
 	
 	private Class<? extends Event> eventClass;
 	
-	private TransitionConstraint guard;
+	private TransitionGuard guard;
 
 	private TransitionEffect effect;
 	
 	public Transition(State source, State target, 
-			Class<? extends Event> eventClass) {
-		this(source, target, eventClass, event -> true);
-	}
-
-	public Transition(State source, State target, 
-			Class<? extends Event> eventClass,
-			TransitionConstraint guard) {
+			Class<? extends Event> eventClass, 
+			TransitionGuard guard,
+			TransitionEffect effect) {
 		this.source = source;
 		this.target = target;
 		this.eventClass = eventClass;
 		this.guard = guard;
-		effect = () -> {};
+		this.effect = effect;
+	}
+
+	public Transition(State source, State target, 
+			Class<? extends Event> eventClass,
+			TransitionGuard guard) {
+		this(source, target, eventClass, guard, () -> {});
 	}
 
 	public Transition(State source, State target, 
 			Class<? extends Event> eventClass, TransitionEffect effect) {
-		this(source, target, eventClass, event -> true);
-		this.effect = effect;
+		this(source, target, eventClass, event -> true, effect);
 	}
 
+	public Transition(State source, State target, 
+			Class<? extends Event> eventClass) {
+		this(source, target, eventClass, event -> true, () -> {});
+	}
+	
 	public State source() {
 		return source;
 	}

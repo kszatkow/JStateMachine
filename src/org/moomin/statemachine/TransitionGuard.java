@@ -1,6 +1,6 @@
 package org.moomin.statemachine;
 
-public interface TransitionConstraint {
+public interface TransitionGuard {
 
 	public boolean evaluate(Event event);
 	

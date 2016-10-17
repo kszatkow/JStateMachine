@@ -1,9 +1,9 @@
 package org.moomin.statemachine.oddeven;
 
-import org.moomin.statemachine.TransitionConstraint;
+import org.moomin.statemachine.TransitionGuard;
 import org.moomin.statemachine.Event;
 
-public class EvenNumberConstraint implements TransitionConstraint {
+public class EvenNumberConstraint implements TransitionGuard {
 
 	@Override
 	public boolean evaluate(Event event) {
