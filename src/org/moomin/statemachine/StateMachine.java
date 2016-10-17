@@ -2,6 +2,7 @@ package org.moomin.statemachine;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +14,7 @@ public class StateMachine {
 	
 	private List<State> states = new ArrayList<State>();
 	
-	private Map<State, Transition> transitions = new HashMap<>();
+	private Map<State, List<Transition>> transitions = new HashMap<>();
 	
 	
 	public void addState(State state) {
@@ -26,7 +27,14 @@ public class StateMachine {
 	}
 
 	public void addTransition(Transition transition) {
-		transitions.put(transition.fromState(), transition);
+		if (transitions.containsKey(transition.fromState())) {
+			List<Transition> transitionsFromState = transitions.get(transition.fromState());
+			transitionsFromState.add(transition);
+		} else {
+			List<Transition> transitionsFromState = new LinkedList<>();
+			transitionsFromState.add(transition);
+			transitions.put(transition.fromState(), transitionsFromState);
+		}
 	}
 
 	public State getCurrentState() {
@@ -34,12 +42,14 @@ public class StateMachine {
 	}
 
 	public void processEvent(Event event) {
-		Transition transition = transitions.get(currentState);
-		// TODO handle multiple transitions from one state
-		if (transition != null) {
-			if(isTransitionPossible(event, transition) ) {
-				// TODO what if toState is not in the state machine?
-				currentState = transition.toState();
+		List<Transition> transitionsFromCurrentState = transitions.get(currentState);
+		if (!transitionsFromCurrentState.isEmpty()) {
+			for (Transition transition : transitionsFromCurrentState) {
+				if(isTransitionPossible(event, transition) ) {
+					// TODO what if toState is not in the state machine?
+					currentState = transition.toState();
+					break ;
+				}
 			}
 		}
 	}
