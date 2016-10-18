@@ -2,6 +2,7 @@ package org.moomin.statemachine;
 
 import static org.junit.Assert.*;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -53,14 +54,17 @@ public class StateMachineTest {
 		// check initial state
 		assertSame(offState, stateMachine.getActiveState());
 	
-		// check on state transitions
+		// on -> on
 		sendEventAndCheckCurrentState(new OnEvent() , onState);
+		// no transition - unhandled event
 		sendEventAndCheckCurrentState(new UnhandledEvent() , onState);
+		// on -> off
 		sendEventAndCheckCurrentState(new OffEvent() , offState);
-
-		// check off state transitions
+		// off -> off
 		sendEventAndCheckCurrentState(new OffEvent() , offState);
+		// no transition - unhandled event
 		sendEventAndCheckCurrentState(new UnhandledEvent() , offState);
+		// off -> on
 		sendEventAndCheckCurrentState(new OnEvent() , onState);
 	}
 
@@ -69,13 +73,14 @@ public class StateMachineTest {
 		State oddState = addState(new OddState("Odd"));
 		State evenState = addState(new EvenState("Even"));
 		
+		// use two different transition constructors on purpose
 		stateMachine.addTransition(new Transition(
 				oddState, evenState, 
 				FeedNumberEvent.class, 
 				new EvenNumberConstraint()));
 		stateMachine.addTransition(new Transition(
 				evenState, oddState, 
-				FeedNumberEvent.class,
+				Collections.singleton(FeedNumberEvent.class),
 				new OddNumberConstraint()));
 				
 		stateMachine.setInitialState(oddState);
@@ -83,19 +88,22 @@ public class StateMachineTest {
 		// check initial state
 		assertSame(oddState, stateMachine.getActiveState());
 		
-		// check odd state transitions
+		// odd -> odd
 		sendEventAndCheckCurrentState(new FeedNumberEvent(11) , oddState);
+		// no transition - unhandled event
 		sendEventAndCheckCurrentState(new UnhandledEvent() , oddState);
+		// odd -> even
 		sendEventAndCheckCurrentState(new FeedNumberEvent(4) , evenState);
-		
-		// check even state transitions
+		// even -> even
 		sendEventAndCheckCurrentState(new FeedNumberEvent(10) , evenState);
+		// no transition - unhandled event
 		sendEventAndCheckCurrentState(new UnhandledEvent() , evenState);
+		// even -> odd
 		sendEventAndCheckCurrentState(new FeedNumberEvent(5) , oddState);
 	}
 	
 	@Test
-	public void multipleTransitionsFromOneStateTestTest() {
+	public void multipleTransitionsFromOneStateTest() {
 		State zeroState = addState(new ZeroState("Zero"));
 		State oddState = addState(new OddState("Odd"));
 		State evenState = addState(new EvenState("Even"));
@@ -118,7 +126,6 @@ public class StateMachineTest {
 		// check initial state
 		assertSame(zeroState, stateMachine.getActiveState());
 	
-		// check transitions
 		// zero -> zero
 		sendEventAndCheckCurrentState(new ZeroNumberEvent() , zeroState);
 		// zero -> odd
@@ -146,13 +153,14 @@ public class StateMachineTest {
 		State offState = addState(new OffState("Off"));
 		State onState = addState(new OnState("On"));
 		
+		// use two different transition constructors on purpose
 		Switch offOnSwitch = new Switch();
 		TurnOnEffect turnOnEffect = new TurnOnEffect(offOnSwitch);
 		stateMachine.addTransition(
 				new Transition(offState, onState, OnEvent.class, turnOnEffect));
 		TurnOffEffect turnOffEffect = new TurnOffEffect(offOnSwitch);
 		stateMachine.addTransition(
-				new Transition(onState, offState, OffEvent.class, turnOffEffect));
+				new Transition(onState, offState, Collections.singletonList(OffEvent.class), turnOffEffect));
 				
 		stateMachine.setInitialState(offState);
 		
