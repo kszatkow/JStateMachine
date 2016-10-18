@@ -17,6 +17,12 @@ public class StateMachine {
 	
 	public void addState(State state) {
 		states.add(state);
+		initializeTransitionsFromState(state);
+	}
+
+	private void initializeTransitionsFromState(State state) {
+		List<Transition> transitionsFromSource = new LinkedList<>();
+		transitions.put(state, transitionsFromSource);
 	}
 
 	public void setInitialState(State initialState) {
@@ -25,14 +31,8 @@ public class StateMachine {
 
 	public void addTransition(Transition transition) {
 		State sourceState = transition.source();
-		if (transitions.containsKey(sourceState)) {
-			List<Transition> transitionsFromState = transitions.get(sourceState);
-			transitionsFromState.add(transition);
-		} else {
-			List<Transition> transitionsFromState = new LinkedList<>();
-			transitionsFromState.add(transition);
-			transitions.put(sourceState, transitionsFromState);
-		}
+		List<Transition> transitionsFromSource = transitions.get(sourceState);
+		transitionsFromSource.add(transition);
 	}
 
 	public State getActiveState() {

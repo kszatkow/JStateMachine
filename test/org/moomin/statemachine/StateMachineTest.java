@@ -213,6 +213,22 @@ public class StateMachineTest {
 		sendEventAndCheckCurrentState(new UnhandledEvent() , idleState);
 	}
 	
+	@Test
+	public void twoStatesNoTransitionTest() {
+		State idleState = addState(new IdleState("Idle"));
+		addState(new ActiveState("Active"));
+		
+		stateMachine.setInitialState(idleState);
+		
+		// check initial state
+		assertSame(idleState, stateMachine.getActiveState());	
+		
+		// no transition possible
+		sendEventAndCheckCurrentState(new MouseWakeupEvent() , idleState);		
+		// no transition possible
+		sendEventAndCheckCurrentState(new KeyWakeupEvent() , idleState);
+	}
+	
 	private State addState(State state) {
 		stateMachine.addState(state);
 		return state;
