@@ -1,16 +1,17 @@
 package org.moomin.statemachine;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class StateMachine {
 
 	private State activeState;
 	
-	private List<State> states = new ArrayList<State>();
+	private Set<State> states = new HashSet<State>();
 	
 	private Map<State, List<Transition>> transitions = new HashMap<>();
 	
@@ -30,8 +31,11 @@ public class StateMachine {
 	}
 
 	public void addTransition(Transition transition) {
-		State sourceState = transition.source();
-		List<Transition> transitionsFromSource = transitions.get(sourceState);
+		if (!states.contains(transition.source()) || !states.contains(transition.target()) ) {
+			throw new IllegalArgumentException("Invalid source of destination state.");
+		}
+		
+		List<Transition> transitionsFromSource = transitions.get(transition.source());
 		transitionsFromSource.add(transition);
 	}
 
@@ -43,7 +47,6 @@ public class StateMachine {
 		List<Transition> outgoingFromActiveState = transitions.get(activeState);
 		for (Transition transition : outgoingFromActiveState) {
 			if( isTransitionEnabled(event, transition) ) {
-				// TODO what if toState is not in the state machine? - this should not happen - such transitions should not be accepted
 				transition.takeEffect();
 				activeState = transition.target();
 				break ;

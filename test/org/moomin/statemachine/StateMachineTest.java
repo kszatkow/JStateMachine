@@ -229,6 +229,40 @@ public class StateMachineTest {
 		sendEventAndCheckCurrentState(new KeyWakeupEvent() , idleState);
 	}
 	
+	@Test
+	public void illegalSourceOrTargetStateTransitionTest() {
+		// legal states
+		State idleState = addState(new IdleState("Idle"));
+		State activeState = addState(new ActiveState("Active"));
+		
+		// illegal states
+		State offState = new OffState("Off");
+		State onState = new OnState("On");
+		
+		stateMachine.setInitialState(idleState);
+		
+		// illegal transition - both states illegal
+		checkIllegalTransitionAddition(offState, onState, OnEvent.class);
+		// illegal transition - source state illegal
+		checkIllegalTransitionAddition(offState, activeState, OnEvent.class);
+		// illegal transition - target state illegal
+		checkIllegalTransitionAddition(idleState, onState, OffEvent.class);
+	}
+
+	private void checkIllegalTransitionAddition(
+			State source, State target, Class<? extends Event> triggerableBy) {
+		Exception expectedException = null;
+		try {
+			stateMachine.addTransition(
+				new Transition(source, target, triggerableBy));
+			fail("Exception should have been thrown.");
+		} catch (IllegalArgumentException exc) {
+			expectedException = exc;
+		} finally {
+			assertTrue(expectedException instanceof IllegalArgumentException);
+		}
+	}
+	
 	private State addState(State state) {
 		stateMachine.addState(state);
 		return state;
