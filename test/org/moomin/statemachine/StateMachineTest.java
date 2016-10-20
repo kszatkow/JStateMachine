@@ -2,6 +2,7 @@ package org.moomin.statemachine;
 
 import static org.junit.Assert.*;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -9,6 +10,7 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.moomin.statemachine.idleactive.ActiveState;
+import org.moomin.statemachine.idleactive.ActiveStateWithDoActionBehaviour;
 import org.moomin.statemachine.idleactive.IdleState;
 import org.moomin.statemachine.idleactive.IdleTimeoutEvent;
 import org.moomin.statemachine.idleactive.KeyWakeupEvent;
@@ -44,10 +46,8 @@ public class StateMachineTest {
 		State offState = addState(new OffState("Off"));
 		State onState = addState(new OnState("On"));
 		
-		stateMachine.addTransition(
-				new Transition(offState, onState, OnEvent.class));
-		stateMachine.addTransition(
-				new Transition(onState, offState, OffEvent.class));
+		addTransition(offState, onState, OnEvent.class);
+		addTransition(onState, offState, OffEvent.class);
 				
 		stateMachine.setInitialState(offState);
 		
@@ -74,14 +74,8 @@ public class StateMachineTest {
 		State evenState = addState(new EvenState("Even"));
 		
 		// use two different transition constructors on purpose
-		stateMachine.addTransition(new Transition(
-				oddState, evenState, 
-				FeedNumberEvent.class, 
-				new EvenNumberConstraint()));
-		stateMachine.addTransition(new Transition(
-				evenState, oddState, 
-				Collections.singleton(FeedNumberEvent.class),
-				new OddNumberConstraint()));
+		addTransition(oddState, evenState, FeedNumberEvent.class, new EvenNumberConstraint());
+		addTransition(evenState, oddState, Collections.singleton(FeedNumberEvent.class), new OddNumberConstraint());
 				
 		stateMachine.setInitialState(oddState);
 		
@@ -101,25 +95,19 @@ public class StateMachineTest {
 		// even -> odd
 		sendEventAndCheckCurrentState(new FeedNumberEvent(5) , oddState);
 	}
-	
+
 	@Test
 	public void multipleTransitionsFromOneStateTest() {
 		State zeroState = addState(new ZeroState("Zero"));
 		State oddState = addState(new OddState("Odd"));
 		State evenState = addState(new EvenState("Even"));
 		
-		stateMachine.addTransition(
-				new Transition(zeroState, oddState, OddNumberEvent.class));
-		stateMachine.addTransition(
-				new Transition(zeroState, evenState, EvenNumberEvent.class));
-		stateMachine.addTransition(
-				new Transition(oddState, evenState, EvenNumberEvent.class));
-		stateMachine.addTransition(
-				new Transition(oddState, zeroState, ZeroNumberEvent.class));
-		stateMachine.addTransition(
-				new Transition(evenState, oddState, OddNumberEvent.class));
-		stateMachine.addTransition(
-				new Transition(evenState, zeroState, ZeroNumberEvent.class));
+		addTransition(zeroState, oddState, OddNumberEvent.class);
+		addTransition(zeroState, evenState, EvenNumberEvent.class);
+		addTransition(oddState, evenState, EvenNumberEvent.class);
+		addTransition(oddState, zeroState, ZeroNumberEvent.class);
+		addTransition(evenState, oddState, OddNumberEvent.class);
+		addTransition(evenState, zeroState, ZeroNumberEvent.class);
 		
 		stateMachine.setInitialState(zeroState);
 		
@@ -156,11 +144,9 @@ public class StateMachineTest {
 		// use two different transition constructors on purpose
 		Switch offOnSwitch = new Switch();
 		TurnOnEffect turnOnEffect = new TurnOnEffect(offOnSwitch);
-		stateMachine.addTransition(
-				new Transition(offState, onState, OnEvent.class, turnOnEffect));
+		addTransition(offState, onState, OnEvent.class, turnOnEffect);
 		TurnOffEffect turnOffEffect = new TurnOffEffect(offOnSwitch);
-		stateMachine.addTransition(
-				new Transition(onState, offState, Collections.singletonList(OffEvent.class), turnOffEffect));
+		addTransition(onState, offState, Collections.singletonList(OffEvent.class), turnOffEffect);
 				
 		stateMachine.setInitialState(offState);
 		
@@ -169,15 +155,15 @@ public class StateMachineTest {
 		assertEquals(false, offOnSwitch.isOn());
 		
 		// turn off
-		sendEventAndCheckCurrentState(new OffEvent() , offState);
+		sendEventAndCheckCurrentState(new OffEvent(), offState);
 		assertEquals(false, offOnSwitch.isOn());
 		
 		// turn on
-		sendEventAndCheckCurrentState(new OnEvent() , onState);
+		sendEventAndCheckCurrentState(new OnEvent(), onState);
 		assertEquals(true, offOnSwitch.isOn());
 
 		// turn off
-		sendEventAndCheckCurrentState(new OffEvent() , offState);
+		sendEventAndCheckCurrentState(new OffEvent(), offState);
 		assertEquals(false, offOnSwitch.isOn());
 	}
 	
@@ -189,10 +175,8 @@ public class StateMachineTest {
 		Set<Class<? extends Event>> triggerableBy = new HashSet<>();
 		triggerableBy.add(KeyWakeupEvent.class);
 		triggerableBy.add(MouseWakeupEvent.class);
-		stateMachine.addTransition(
-				new Transition(idleState, activeState, triggerableBy));
-		stateMachine.addTransition(
-				new Transition(activeState, idleState, IdleTimeoutEvent.class));
+		addTransition(idleState, activeState, triggerableBy);
+		addTransition(activeState, idleState, IdleTimeoutEvent.class);
 				
 		stateMachine.setInitialState(idleState);
 		
@@ -200,17 +184,17 @@ public class StateMachineTest {
 		assertSame(idleState, stateMachine.getActiveState());	
 		
 		// idle -> idle
-		sendEventAndCheckCurrentState(new IdleTimeoutEvent() , idleState);		
+		sendEventAndCheckCurrentState(new IdleTimeoutEvent(), idleState);		
 		// idle -> active (key event)
-		sendEventAndCheckCurrentState(new KeyWakeupEvent() , activeState);
+		sendEventAndCheckCurrentState(new KeyWakeupEvent(), activeState);
 		// active -> idle
-		sendEventAndCheckCurrentState(new IdleTimeoutEvent() , idleState);	
+		sendEventAndCheckCurrentState(new IdleTimeoutEvent(), idleState);	
 		// idle -> active (mouse event)
-		sendEventAndCheckCurrentState(new MouseWakeupEvent() , activeState);
+		sendEventAndCheckCurrentState(new MouseWakeupEvent(), activeState);
 		// active -> idle
-		sendEventAndCheckCurrentState(new IdleTimeoutEvent() , idleState);	
+		sendEventAndCheckCurrentState(new IdleTimeoutEvent(), idleState);	
 		// no transition - unhandled event
-		sendEventAndCheckCurrentState(new UnhandledEvent() , idleState);
+		sendEventAndCheckCurrentState(new UnhandledEvent(), idleState);
 	}
 	
 	@Test
@@ -280,9 +264,51 @@ public class StateMachineTest {
 		duplicateStateChecker.checkExceptionThrownAfterAction();
 	}
 	
+//	@Test
+//	public void stateDoActionTest() {
+//		State idleState = addState(new IdleState("Idle"));
+//		ActiveStateWithDoActionBehaviour activeState = 
+//				(ActiveStateWithDoActionBehaviour) addState(new ActiveStateWithDoActionBehaviour("ActiveState"));
+//		
+//		addTransition(idleState, activeState, KeyWakeupEvent.class);
+//		addTransition(activeState, idleState, IdleTimeoutEvent.class);
+//				
+//		stateMachine.setInitialState(idleState);
+//		
+//		
+//	}
+	
 	private State addState(State state) {
 		stateMachine.addState(state);
 		return state;
+	}
+	
+	private void addTransition(State source, State target, Class<? extends Event> triggerableBy) {
+		stateMachine.addTransition(
+				new Transition(source, target, triggerableBy));
+	}
+
+	private void addTransition(State source, State target, Collection<Class<? extends Event>> triggerableBy) {
+		stateMachine.addTransition(
+				new Transition(source, target, triggerableBy));
+	}
+	
+	private void addTransition(State source, State target, Class<? extends Event> triggerableBy, TransitionEffect effect) {
+		stateMachine.addTransition(
+				new Transition(source, target, triggerableBy, effect));
+	}
+
+	private void addTransition(State source, State target, Collection<Class<? extends Event>> triggerableBy, TransitionEffect effect) {
+		stateMachine.addTransition(
+				new Transition(source, target, triggerableBy, effect));
+	}
+	
+	private void addTransition(State source, State target, Class<? extends Event> triggerableBy, TransitionGuard guard) {
+		stateMachine.addTransition(new Transition(source, target, triggerableBy, guard));
+	}
+	
+	private void addTransition(State source, State target, Set<Class<? extends Event>> triggerableBy, TransitionGuard guard) {
+		stateMachine.addTransition(new Transition(source, target, triggerableBy, guard));
 	}
 	
 	private void sendEventAndCheckCurrentState(Event event, State expectedState) {
