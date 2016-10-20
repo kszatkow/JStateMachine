@@ -220,7 +220,7 @@ public class StateMachineTest {
 		State offState = new OffState("Off");
 		State onState = new OnState("On");
 		
-		setInitialTransitionAndActivate(idleState);
+		setInitialTransition(idleState, null);
 		
 		// prepare exception thrown checker
 		ExceptionThrownIllegalTransitionChecker illegalTransitionChecker = new ExceptionThrownIllegalTransitionChecker(
@@ -277,8 +277,130 @@ public class StateMachineTest {
 					}
 		};
 		
-		// duplicate state added - exception thrown
+		// invalid default state chosen - exception thrown
 		invalidDefaultStateChecker.checkExceptionThrownAfterAction();
+	}
+	
+	@Test 
+	public void illegalInitialTransitionSetupAfterActivationTest() {
+		State idleState = addState(new IdleState("Idle"));
+		addState(new ActiveState("Active"));
+		
+		setInitialTransitionAndActivate(idleState);
+		
+		// prepare exception thrown checker
+		ExceptionThrownChecker illegalStateAdditionChecker = new ExceptionThrownChecker(
+				IllegalStateException.class, 
+				"Exception should have been thrown - illegal initial transition setup.") {
+					@Override
+					protected void doAction() {
+						stateMachine.addState(State.NULL_STATE);
+					}
+		};
+		
+		// illegal action taken - exception thrown
+		illegalStateAdditionChecker.checkExceptionThrownAfterAction();
+	}
+	
+	@Test 
+	public void illegalStateAdditionAfterActivationTest() {
+		State idleState = addState(new IdleState("Idle"));
+		addState(new ActiveState("Active"));
+		
+		setInitialTransitionAndActivate(idleState);
+		
+		// prepare exception thrown checker
+		ExceptionThrownChecker illegalStateAdditionChecker = new ExceptionThrownChecker(
+				IllegalStateException.class, 
+				"Exception should have been thrown - illegal state addition.") {
+					@Override
+					protected void doAction() {
+						setInitialTransition(new OnState(""), null);
+					}
+		};
+		
+		// illegal action taken - exception thrown
+		illegalStateAdditionChecker.checkExceptionThrownAfterAction();
+	}
+	
+	@Test 
+	public void illegalTransitionAdditionAfterActivationTest() {
+		State idleState = addState(new IdleState("Idle"));
+		addState(new ActiveState("Active"));
+		
+		setInitialTransitionAndActivate(idleState);
+		
+		// prepare exception thrown checker
+		ExceptionThrownChecker illegalTransitionAdditionChecker = new ExceptionThrownChecker(
+				IllegalStateException.class, 
+				"Exception should have been thrown - illegal transition addition.") {
+					@Override
+					protected void doAction() {
+						addTransition(idleState, new OnState(""), OnEvent.class);
+					}
+		};
+		
+		// illegal action taken - exception thrown
+		illegalTransitionAdditionChecker.checkExceptionThrownAfterAction();
+	}
+
+	@Test 
+	public void illegalDoubleActivationTest() {
+		State idleState = addState(new IdleState("Idle"));
+		addState(new ActiveState("Active"));
+		
+		setInitialTransitionAndActivate(idleState);
+		
+		// prepare exception thrown checker
+		ExceptionThrownChecker illegalDoubleActivationChecker = new ExceptionThrownChecker(
+				IllegalStateException.class, 
+				"Exception should have been thrown - illegal double activation.") {
+					@Override
+					protected void doAction() {
+						stateMachine.activate();
+					}
+		};
+		
+		// illegal action taken - exception thrown
+		illegalDoubleActivationChecker.checkExceptionThrownAfterAction();
+	}
+	
+	@Test 
+	public void illegalEventProcessingBeforeActivationTest() {
+		addState(new IdleState("Idle"));
+		addState(new ActiveState("Active"));
+		
+		// prepare exception thrown checker
+		ExceptionThrownChecker illegalTransitionAdditionChecker = new ExceptionThrownChecker(
+				IllegalStateException.class, 
+				"Exception should have been thrown - illegal event processing.") {
+					@Override
+					protected void doAction() {
+						stateMachine.processEvent(new IdleTimeoutEvent());
+					}
+		};
+		
+		// illegal action taken - exception thrown
+		illegalTransitionAdditionChecker.checkExceptionThrownAfterAction();
+	}
+	
+	@Test 
+	public void illegalActiveStateBeforeActivationTest() {
+		addState(new IdleState("Idle"));
+		addState(new ActiveState("Active"));
+		
+		// prepare exception thrown checker
+		ExceptionThrownChecker illegalTransitionAdditionChecker = new ExceptionThrownChecker(
+				IllegalStateException.class, 
+				"Exception should have been thrown - illegal active state read.") {
+					@Override
+					protected void doAction() {
+						stateMachine.getActiveState();
+					}
+		};
+		
+		// illegal action taken - exception thrown
+		illegalTransitionAdditionChecker.checkExceptionThrownAfterAction();
 	}
 	
 	@Test
