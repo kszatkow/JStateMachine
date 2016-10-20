@@ -17,6 +17,10 @@ public class StateMachine {
 	
 	
 	public void addState(State state) {
+		if (states.contains(state)) {
+			throw new IllegalArgumentException("Duplicate state");
+		}
+		
 		states.add(state);
 		initializeTransitionsFromState(state);
 	}

@@ -241,26 +241,43 @@ public class StateMachineTest {
 		
 		stateMachine.setInitialState(idleState);
 		
+		// prepare exception thrown checker
+		ExceptionThrownIllegalTransitionChecker illegalTransitionChecker = new ExceptionThrownIllegalTransitionChecker(
+				IllegalArgumentException.class, 
+				"Exception should have been thrown - illegal transition added.",
+				stateMachine);
+		
 		// illegal transition - both states illegal
-		checkIllegalTransitionAddition(offState, onState, OnEvent.class);
+		illegalTransitionChecker.setIllegalTransition(new Transition(offState, onState, OnEvent.class));
+		illegalTransitionChecker.checkExceptionThrownAfterAction();
+		
 		// illegal transition - source state illegal
-		checkIllegalTransitionAddition(offState, activeState, OnEvent.class);
+		illegalTransitionChecker.setIllegalTransition(new Transition(offState, activeState, OnEvent.class));
+		illegalTransitionChecker.checkExceptionThrownAfterAction();
+		
 		// illegal transition - target state illegal
-		checkIllegalTransitionAddition(idleState, onState, OffEvent.class);
+		illegalTransitionChecker.setIllegalTransition(new Transition(idleState, onState, OffEvent.class));
+		illegalTransitionChecker.checkExceptionThrownAfterAction();
 	}
 
-	private void checkIllegalTransitionAddition(
-			State source, State target, Class<? extends Event> triggerableBy) {
-		Exception expectedException = null;
-		try {
-			stateMachine.addTransition(
-				new Transition(source, target, triggerableBy));
-			fail("Exception should have been thrown.");
-		} catch (IllegalArgumentException exc) {
-			expectedException = exc;
-		} finally {
-			assertTrue(expectedException instanceof IllegalArgumentException);
-		}
+	@Test
+	public void duplicateStatesTest() {
+		// legal states
+		State idleState = addState(new IdleState("Idle"));
+		addState(new ActiveState("Active"));
+		
+		// prepare exception thrown checker
+		ExceptionThrownChecker duplicateStateChecker = new ExceptionThrownChecker(
+				IllegalArgumentException.class, 
+				"Exception should have been thrown - duplicate state added.") {
+					@Override
+					protected void doAction() {
+						addState(idleState);
+					}
+		};
+		
+		// duplicate state added - exception thrown
+		duplicateStateChecker.checkExceptionThrownAfterAction();
 	}
 	
 	private State addState(State state) {
