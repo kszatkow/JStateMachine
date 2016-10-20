@@ -43,6 +43,20 @@ public class StateMachineTest {
 	}
 	
 	@Test
+	public void initialPseudostateTest() {
+		State normalState = addState(new NoBehaviourState());
+		
+		InitialTransitionTestEffect initialTransitionTestEffect = new InitialTransitionTestEffect();
+		setInitialTransition(normalState, initialTransitionTestEffect);
+		
+		assertFalse(initialTransitionTestEffect.hasBeenExecuted());
+		
+		stateMachine.activate();
+		assertSame(normalState, stateMachine.getActiveState());
+		assertTrue(initialTransitionTestEffect.hasBeenExecuted());
+	}
+
+	@Test
 	public void transitionsWithoutGuardsTest() {
 		State offState = addState(new OffState("Off"));
 		State onState = addState(new OnState("On"));
@@ -50,7 +64,7 @@ public class StateMachineTest {
 		addTransition(offState, onState, OnEvent.class);
 		addTransition(onState, offState, OffEvent.class);
 				
-		setInitialStateAndCheckIfActive(offState);
+		setInitialTransitionAndActivate(offState);
 	
 		// on -> on
 		sendEventAndCheckCurrentState(new OnEvent() , onState);
@@ -75,7 +89,7 @@ public class StateMachineTest {
 		addTransition(oddState, evenState, FeedNumberEvent.class, new EvenNumberConstraint());
 		addTransition(evenState, oddState, Collections.singleton(FeedNumberEvent.class), new OddNumberConstraint());
 				
-		setInitialStateAndCheckIfActive(oddState);
+		setInitialTransitionAndActivate(oddState);
 		
 		// odd -> odd
 		sendEventAndCheckCurrentState(new FeedNumberEvent(11) , oddState);
@@ -104,7 +118,7 @@ public class StateMachineTest {
 		addTransition(evenState, oddState, OddNumberEvent.class);
 		addTransition(evenState, zeroState, ZeroNumberEvent.class);
 		
-		setInitialStateAndCheckIfActive(zeroState);
+		setInitialTransitionAndActivate(zeroState);
 	
 		// zero -> zero
 		sendEventAndCheckCurrentState(new ZeroNumberEvent() , zeroState);
@@ -140,7 +154,7 @@ public class StateMachineTest {
 		TurnOffEffect turnOffEffect = new TurnOffEffect(offOnSwitch);
 		addTransition(onState, offState, Collections.singletonList(OffEvent.class), turnOffEffect);
 				
-		setInitialStateAndCheckIfActive(offState);	
+		setInitialTransitionAndActivate(offState);	
 		assertEquals(false, offOnSwitch.isOn());
 		
 		// turn off
@@ -167,7 +181,7 @@ public class StateMachineTest {
 		addTransition(idleState, activeState, triggerableBy);
 		addTransition(activeState, idleState, IdleTimeoutEvent.class);
 				
-		setInitialStateAndCheckIfActive(idleState);	
+		setInitialTransitionAndActivate(idleState);	
 		
 		// idle -> idle
 		sendEventAndCheckCurrentState(new IdleTimeoutEvent(), idleState);		
@@ -188,7 +202,7 @@ public class StateMachineTest {
 		State idleState = addState(new IdleState("Idle"));
 		addState(new ActiveState("Active"));
 		
-		setInitialStateAndCheckIfActive(idleState);	
+		setInitialTransitionAndActivate(idleState);	
 		
 		// no transition possible
 		sendEventAndCheckCurrentState(new MouseWakeupEvent() , idleState);		
@@ -206,7 +220,7 @@ public class StateMachineTest {
 		State offState = new OffState("Off");
 		State onState = new OnState("On");
 		
-		setInitialStateAndCheckIfActive(idleState);
+		setInitialTransitionAndActivate(idleState);
 		
 		// prepare exception thrown checker
 		ExceptionThrownIllegalTransitionChecker illegalTransitionChecker = new ExceptionThrownIllegalTransitionChecker(
@@ -247,24 +261,24 @@ public class StateMachineTest {
 		duplicateStateChecker.checkExceptionThrownAfterAction();
 	}
 	
-	@Test
-	public void invalidInitialStateTest() {
+	@Test 
+	public void invalidDefaultStateTest() {
 		// legal states
 		addState(new IdleState("Idle"));
 		addState(new ActiveState("Active"));
 		
 		// prepare exception thrown checker
-		ExceptionThrownChecker invalidInitialStateChecker = new ExceptionThrownChecker(
+		ExceptionThrownChecker invalidDefaultStateChecker = new ExceptionThrownChecker(
 				IllegalArgumentException.class, 
-				"Exception should have been thrown - invalid initial state set.") {
+				"Exception should have been thrown - invalid default state set.") {
 					@Override
 					protected void doAction() {
-						stateMachine.setInitialState(new OnState("On"));
+						setInitialTransitionAndActivate(new OnState("On"));
 					}
 		};
 		
 		// duplicate state added - exception thrown
-		invalidInitialStateChecker.checkExceptionThrownAfterAction();
+		invalidDefaultStateChecker.checkExceptionThrownAfterAction();
 	}
 	
 	@Test
@@ -280,7 +294,7 @@ public class StateMachineTest {
 		assertFalse(idleState.hasOnEntryBeenExecuted());
 		assertFalse(idleState.hasOnExitBeenExecuted());
 		
-		setInitialStateAndCheckIfActive(idleState);
+		setInitialTransitionAndActivate(idleState);
 		assertTrue(idleState.hasOnEntryBeenExecuted());
 		assertFalse(idleState.hasOnExitBeenExecuted());
 		
@@ -333,9 +347,21 @@ public class StateMachineTest {
 		stateMachine.addTransition(new Transition(source, target, triggerableBy, guard));
 	}
 	
-	private void setInitialStateAndCheckIfActive(State initialState) {
-		stateMachine.setInitialState(initialState);
-		assertSame(initialState, stateMachine.getActiveState());
+	private void setInitialTransitionAndActivate(State initialState) {
+		setInitialTransition(
+				initialState,
+				new TransitionEffect() {
+						@Override
+						public void execute() {
+							// empty on purpose
+						}
+				});
+		stateMachine.activate();
+	}
+	
+	private void setInitialTransition(State target, TransitionEffect effect) {
+		stateMachine.setInitialTransition(new InitialTransition(target, effect));
+		
 	}
 	
 	private void sendEventAndCheckCurrentState(Event event, State expectedState) {
