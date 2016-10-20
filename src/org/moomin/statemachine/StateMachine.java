@@ -32,6 +32,7 @@ public class StateMachine {
 
 	public void setInitialState(State initialState) {
 		activeState = initialState;
+		activeState.onEntry();
 	}
 
 	public void addTransition(Transition transition) {
@@ -51,8 +52,11 @@ public class StateMachine {
 		List<Transition> outgoingFromActiveState = transitions.get(activeState);
 		for (Transition transition : outgoingFromActiveState) {
 			if( isTransitionEnabled(event, transition) ) {
+				activeState.onExit();
 				transition.takeEffect();
 				activeState = transition.target();
+				activeState.onEntry();
+				activeState.doAction();
 				break ;
 			}
 		}

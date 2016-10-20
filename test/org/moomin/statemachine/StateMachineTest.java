@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.moomin.statemachine.idleactive.ActiveState;
 import org.moomin.statemachine.idleactive.ActiveStateWithDoActionBehaviour;
 import org.moomin.statemachine.idleactive.IdleState;
+import org.moomin.statemachine.idleactive.IdleStateWithOnEntryAndOnExitBehaviours;
 import org.moomin.statemachine.idleactive.IdleTimeoutEvent;
 import org.moomin.statemachine.idleactive.KeyWakeupEvent;
 import org.moomin.statemachine.idleactive.MouseWakeupEvent;
@@ -246,19 +247,38 @@ public class StateMachineTest {
 		duplicateStateChecker.checkExceptionThrownAfterAction();
 	}
 	
-//	@Test
-//	public void stateDoActionTest() {
-//		State idleState = addState(new IdleState("Idle"));
-//		ActiveStateWithDoActionBehaviour activeState = 
-//				(ActiveStateWithDoActionBehaviour) addState(new ActiveStateWithDoActionBehaviour("ActiveState"));
-//		
-//		addTransition(idleState, activeState, KeyWakeupEvent.class);
-//		addTransition(activeState, idleState, IdleTimeoutEvent.class);
-//				
-//		stateMachine.setInitialState(idleState);
-//		
-//		
-//	}
+	@Test
+	public void stateBehavioursTest() {
+		IdleStateWithOnEntryAndOnExitBehaviours idleState = 
+				(IdleStateWithOnEntryAndOnExitBehaviours) addState(new IdleStateWithOnEntryAndOnExitBehaviours("Idle"));
+		ActiveStateWithDoActionBehaviour activeState = 
+				(ActiveStateWithDoActionBehaviour) addState(new ActiveStateWithDoActionBehaviour("ActiveState"));
+		
+		addTransition(idleState, activeState, KeyWakeupEvent.class);
+		addTransition(activeState, idleState, IdleTimeoutEvent.class);
+		
+		assertFalse(idleState.hasOnEntryBeenExecuted());
+		assertFalse(idleState.hasOnExitBeenExecuted());
+		
+		setInitialStateAndCheckIfActive(idleState);
+		assertTrue(idleState.hasOnEntryBeenExecuted());
+		assertFalse(idleState.hasOnExitBeenExecuted());
+		
+		idleState.clearExecutionStateFlags();
+		
+		// initial state - active state onAction not executed yet
+		assertFalse(activeState.hasOnActionBeenExecuted());
+		
+		// transition to active state - onExit of source state and onAction of target state executed
+		sendEventAndCheckCurrentState(new KeyWakeupEvent() , activeState);
+		assertFalse(idleState.hasOnEntryBeenExecuted());
+		assertTrue(idleState.hasOnExitBeenExecuted());
+		assertTrue(activeState.hasOnActionBeenExecuted());
+		
+		// transition back to idle state - onEntry of target state executed
+		sendEventAndCheckCurrentState(new IdleTimeoutEvent() , idleState);
+		assertTrue(idleState.hasOnEntryBeenExecuted());
+	}
 	
 	private State addState(State state) {
 		stateMachine.addState(state);
