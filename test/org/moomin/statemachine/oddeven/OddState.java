@@ -1,8 +1,8 @@
 package org.moomin.statemachine.oddeven;
 
-import org.moomin.statemachine.State;
+import org.moomin.statemachine.NoBehaviourState;
 
-public class OddState implements State {
+public class OddState extends NoBehaviourState {
 
 	public OddState(String string) { }
 

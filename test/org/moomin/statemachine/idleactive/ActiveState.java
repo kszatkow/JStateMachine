@@ -1,8 +1,8 @@
 package org.moomin.statemachine.idleactive;
 
-import org.moomin.statemachine.State;
+import org.moomin.statemachine.NoBehaviourState;
 
-public class ActiveState implements State {
+public class ActiveState extends NoBehaviourState {
 
 	public ActiveState(String string) {	}
 
