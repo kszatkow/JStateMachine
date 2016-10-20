@@ -17,7 +17,7 @@ public class StateMachine {
 	
 	private Map<State, List<Transition>> transitions = new HashMap<>();
 
-	private State activeState;
+	private State activeState = State.NULL_STATE;
 
 	
 	public void addState(State state) {
@@ -57,7 +57,7 @@ public class StateMachine {
 		}
 	}
 
-	private void fireTransition(Transition transition) {
+	private void fireTransition(InitialTransition transition) {
 		activeState.onExit();
 		transition.takeEffect();
 		activeState = transition.target();
@@ -73,10 +73,7 @@ public class StateMachine {
 	public void activate() {
 		isActive = true;
 		
-		initialTransition.takeEffect();
-		activeState = initialTransition.target();
-		activeState.onEntry();
-		activeState.doAction();
+		fireTransition(initialTransition);
 	}
 
 	public void setInitialTransition(InitialTransition initialTransition) {

@@ -5,26 +5,22 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Transition {
+public class Transition extends InitialTransition {
 
 	private State source;
-	
-	private State target;
 	
 	private Set<Class<? extends Event>> triggerableBy = new HashSet<>();
 	
 	private TransitionGuard guard;
 
-	private TransitionEffect effect;
 	
 	public Transition(State source, State target, 
 			Collection<Class<? extends Event>> triggerableBy,
 			TransitionGuard guard,
 			TransitionEffect effect) {
+		super(target, effect);
 		this.source = source;
-		this.target = target;
 		this.guard = guard; 
-		this.effect = effect;
 		this.triggerableBy.addAll(triggerableBy);
 	}
 	
@@ -73,10 +69,6 @@ public class Transition {
 		return source;
 	}
 
-	public State target() {
-		return target;
-	}
-
 	public boolean isTriggerableBy(Event event) {
 		for (Class<? extends Event> eventClass : triggerableBy) {
 			if (eventClass.isInstance(event)) {
@@ -88,10 +80,6 @@ public class Transition {
 	
 	public boolean evaluateGuardFor(Event event) {
 		return guard.evaluate(event);
-	}
-
-	public void takeEffect() {
-		effect.execute();
 	}
 
 }

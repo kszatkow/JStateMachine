@@ -44,7 +44,7 @@ public class StateMachineTest {
 	
 	@Test
 	public void initialPseudostateTest() {
-		State normalState = addState(new NoBehaviourState());
+		State normalState = addState(State.NULL_STATE);
 		
 		InitialTransitionTestEffect initialTransitionTestEffect = new InitialTransitionTestEffect();
 		setInitialTransition(normalState, initialTransitionTestEffect);
