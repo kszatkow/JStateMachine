@@ -9,17 +9,17 @@ public abstract class NoBehaviourState implements State {
 	protected NoBehaviourState() {}
 	
 	@Override
-	public void onEntry() {
+	public final void onEntry() {
 		// empty on purpose
 	}
 
 	@Override
-	public void doAction() {
+	public final void doAction() {
 		// empty on purpose
 	}
 
 	@Override
-	public void onExit() {
+	public final void onExit() {
 		// empty on purpose
 	}
 

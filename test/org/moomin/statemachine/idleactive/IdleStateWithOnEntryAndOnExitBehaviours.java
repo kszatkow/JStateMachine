@@ -1,6 +1,5 @@
 package org.moomin.statemachine.idleactive;
 
-import org.moomin.statemachine.Event;
 import org.moomin.statemachine.State;
 
 public class IdleStateWithOnEntryAndOnExitBehaviours implements State {
@@ -40,7 +39,7 @@ public class IdleStateWithOnEntryAndOnExitBehaviours implements State {
 	}
 
 	@Override
-	public boolean consumesEvent(Event event) {
+	public boolean isPassThrough() {
 		return true;
 	}
 }

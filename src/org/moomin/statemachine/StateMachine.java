@@ -56,11 +56,12 @@ public class StateMachine {
 	public void processEvent(Event event) {
 		throwIfInIllegalInactiveState("Even processing not allowed when state machine is inactive, activate first.");
 		
+		//TODO - how to process transition without a trigger?
 		List<Transition> outgoingFromActiveState = transitions.get(activeState);
 		for (Transition transition : outgoingFromActiveState) {
 			if( isTransitionEnabled(event, transition) ) {
 				fireTransition(transition);
-				if (!activeState.consumesEvent(event)) {
+				if (activeState.isPassThrough()) {
 					processEvent(event);
 				}
 				break ;

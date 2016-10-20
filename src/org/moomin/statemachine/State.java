@@ -7,8 +7,8 @@ public interface State {
 	 */
 	public static final State NULL_STATE = new NoBehaviourState() {
 		@Override
-		public boolean consumesEvent(Event event) {
-			return false;
+		public boolean isPassThrough() {
+			return true;
 	}};
 	
 	public void onEntry();
@@ -16,6 +16,7 @@ public interface State {
 	public void doAction();
 	
 	public void onExit();
+	
+	public boolean isPassThrough();
 
-	public boolean consumesEvent(Event event);
 }

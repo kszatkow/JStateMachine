@@ -16,7 +16,6 @@ import org.moomin.statemachine.idleactive.IdleStateWithOnEntryAndOnExitBehaviour
 import org.moomin.statemachine.idleactive.IdleTimeoutEvent;
 import org.moomin.statemachine.idleactive.KeyWakeupEvent;
 import org.moomin.statemachine.idleactive.MouseWakeupEvent;
-import org.moomin.statemachine.oddeven.CheckParity;
 import org.moomin.statemachine.oddeven.EvenNumberGuard;
 import org.moomin.statemachine.oddeven.EvenNumberEvent;
 import org.moomin.statemachine.oddeven.EvenState;
@@ -68,7 +67,7 @@ public class StateMachineTest {
 				
 		setInitialTransitionAndActivate(offState);
 	
-		// on -> on
+		// off -> on
 		sendEventAndCheckCurrentState(new OnEvent() , onState);
 		// no transition - unhandled event
 		sendEventAndCheckCurrentState(new UnhandledEvent() , onState);
@@ -82,6 +81,25 @@ public class StateMachineTest {
 		sendEventAndCheckCurrentState(new OnEvent() , onState);
 	}
 
+	@Test
+	public void proxyStateTest() {
+		State offState = addState(new OffState("Off"));
+		State proxyState = addState(State.NULL_STATE);
+		State onState = addState(new OnState("On"));
+		
+		addTransition(offState, proxyState, OnEvent.class);
+		addTransition(proxyState, onState, OnEvent.class);
+		addTransition(onState, proxyState, OffEvent.class);
+		addTransition(proxyState, offState, OffEvent.class);
+				
+		setInitialTransitionAndActivate(offState);
+	
+		// off -> on
+		sendEventAndCheckCurrentState(new OnEvent() , onState);
+		// on -> off
+		sendEventAndCheckCurrentState(new OffEvent() , offState);
+	}
+	
 	@Test
 	public void transitionsWithGuardsTest() {
 		State oddState = addState(new OddState("Odd"));
@@ -443,7 +461,7 @@ public class StateMachineTest {
 		State zeroState = addState(new ZeroState("Zero"));
 		State oddState = addState(new OddState("Odd"));
 		State evenState = addState(new EvenState("Even"));
-		State checkParity = addState(new CheckParity("CheckParity"));
+		State checkParity = addState(new ChoiceState("CheckParity"));
 		
 		addTransition(zeroState, checkParity, FeedNumberEvent.class);
 		addTransition(oddState, checkParity, FeedNumberEvent.class);
