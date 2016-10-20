@@ -18,7 +18,7 @@ public class StateMachine {
 	
 	public void addState(State state) {
 		if (states.contains(state)) {
-			throw new IllegalArgumentException("Duplicate state");
+			throw new IllegalArgumentException("Duplicate state.");
 		}
 		
 		states.add(state);
@@ -31,6 +31,10 @@ public class StateMachine {
 	}
 
 	public void setInitialState(State initialState) {
+		if (!states.contains(initialState)) {
+			throw new IllegalArgumentException("Invalid initial state - state not contained in the state machine.");
+		}
+		
 		activeState = initialState;
 		activeState.onEntry();
 	}

@@ -248,6 +248,26 @@ public class StateMachineTest {
 	}
 	
 	@Test
+	public void invalidInitialStateTest() {
+		// legal states
+		addState(new IdleState("Idle"));
+		addState(new ActiveState("Active"));
+		
+		// prepare exception thrown checker
+		ExceptionThrownChecker invalidInitialStateChecker = new ExceptionThrownChecker(
+				IllegalArgumentException.class, 
+				"Exception should have been thrown - invalid initial state set.") {
+					@Override
+					protected void doAction() {
+						stateMachine.setInitialState(new OnState("On"));
+					}
+		};
+		
+		// duplicate state added - exception thrown
+		invalidInitialStateChecker.checkExceptionThrownAfterAction();
+	}
+	
+	@Test
 	public void stateBehavioursTest() {
 		IdleStateWithOnEntryAndOnExitBehaviours idleState = 
 				(IdleStateWithOnEntryAndOnExitBehaviours) addState(new IdleStateWithOnEntryAndOnExitBehaviours("Idle"));
