@@ -1,5 +1,6 @@
 package org.moomin.statemachine.idleactive;
 
+import org.moomin.statemachine.Event;
 import org.moomin.statemachine.State;
 
 public class ActiveStateWithDoActionBehaviour implements State {
@@ -26,6 +27,11 @@ public class ActiveStateWithDoActionBehaviour implements State {
 
 	public boolean hasOnActionBeenExecuted() {
 		return onActionDone;
+	}
+
+	@Override
+	public boolean consumesEvent(Event event) {
+		return true;
 	}
 
 }

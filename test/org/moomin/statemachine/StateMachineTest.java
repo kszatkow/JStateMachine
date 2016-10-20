@@ -16,14 +16,16 @@ import org.moomin.statemachine.idleactive.IdleStateWithOnEntryAndOnExitBehaviour
 import org.moomin.statemachine.idleactive.IdleTimeoutEvent;
 import org.moomin.statemachine.idleactive.KeyWakeupEvent;
 import org.moomin.statemachine.idleactive.MouseWakeupEvent;
-import org.moomin.statemachine.oddeven.EvenNumberConstraint;
+import org.moomin.statemachine.oddeven.CheckParity;
+import org.moomin.statemachine.oddeven.EvenNumberGuard;
 import org.moomin.statemachine.oddeven.EvenNumberEvent;
 import org.moomin.statemachine.oddeven.EvenState;
 import org.moomin.statemachine.oddeven.FeedNumberEvent;
-import org.moomin.statemachine.oddeven.OddNumberConstraint;
+import org.moomin.statemachine.oddeven.OddNumberGuard;
 import org.moomin.statemachine.oddeven.OddNumberEvent;
 import org.moomin.statemachine.oddeven.OddState;
 import org.moomin.statemachine.oddeven.ZeroNumberEvent;
+import org.moomin.statemachine.oddeven.ZeroNumberGuard;
 import org.moomin.statemachine.oddeven.ZeroState;
 import org.moomin.statemachine.onoff.OffEvent;
 import org.moomin.statemachine.onoff.OffState;
@@ -86,8 +88,8 @@ public class StateMachineTest {
 		State evenState = addState(new EvenState("Even"));
 		
 		// use two different transition constructors on purpose
-		addTransition(oddState, evenState, FeedNumberEvent.class, new EvenNumberConstraint());
-		addTransition(evenState, oddState, Collections.singleton(FeedNumberEvent.class), new OddNumberConstraint());
+		addTransition(oddState, evenState, FeedNumberEvent.class, new EvenNumberGuard());
+		addTransition(evenState, oddState, Collections.singleton(FeedNumberEvent.class), new OddNumberGuard());
 				
 		setInitialTransitionAndActivate(oddState);
 		
@@ -435,6 +437,45 @@ public class StateMachineTest {
 		sendEventAndCheckCurrentState(new IdleTimeoutEvent() , idleState);
 		assertTrue(idleState.hasOnEntryBeenExecuted());
 	}
+	
+	@Test
+	public void choicePseudostateTest() {
+		State zeroState = addState(new ZeroState("Zero"));
+		State oddState = addState(new OddState("Odd"));
+		State evenState = addState(new EvenState("Even"));
+		State checkParity = addState(new CheckParity("CheckParity"));
+		
+		addTransition(zeroState, checkParity, FeedNumberEvent.class);
+		addTransition(oddState, checkParity, FeedNumberEvent.class);
+		addTransition(evenState, checkParity, FeedNumberEvent.class);
+		addTransition(checkParity, evenState, FeedNumberEvent.class, new EvenNumberGuard());
+		addTransition(checkParity, oddState, FeedNumberEvent.class, new OddNumberGuard());
+		addTransition(checkParity, zeroState, FeedNumberEvent.class, new ZeroNumberGuard());
+		
+		setInitialTransitionAndActivate(zeroState);
+	
+		// zero -> zero
+		sendEventAndCheckCurrentState(new FeedNumberEvent(0) , zeroState);
+		// zero -> odd
+		sendEventAndCheckCurrentState(new FeedNumberEvent(3) , oddState);
+		// odd -> odd
+		sendEventAndCheckCurrentState(new FeedNumberEvent(5) , oddState);
+		// odd -> zero
+		sendEventAndCheckCurrentState(new FeedNumberEvent(0) , zeroState);
+		// zero -> even
+		sendEventAndCheckCurrentState(new FeedNumberEvent(2) , evenState);
+		// even -> even
+		sendEventAndCheckCurrentState(new FeedNumberEvent(12) , evenState);
+		// even -> zero
+		sendEventAndCheckCurrentState(new FeedNumberEvent(0) , zeroState);
+		// zero -> odd
+		sendEventAndCheckCurrentState(new FeedNumberEvent(13) , oddState);
+		// odd -> even
+		sendEventAndCheckCurrentState(new FeedNumberEvent(18) , evenState);
+		// even -> odd
+		sendEventAndCheckCurrentState(new FeedNumberEvent(15) , oddState);
+	}
+	
 	
 	private State addState(State state) {
 		stateMachine.addState(state);

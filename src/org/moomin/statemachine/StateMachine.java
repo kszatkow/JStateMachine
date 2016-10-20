@@ -60,6 +60,9 @@ public class StateMachine {
 		for (Transition transition : outgoingFromActiveState) {
 			if( isTransitionEnabled(event, transition) ) {
 				fireTransition(transition);
+				if (!activeState.consumesEvent(event)) {
+					processEvent(event);
+				}
 				break ;
 			}
 		}

@@ -1,9 +1,10 @@
 package org.moomin.statemachine.idleactive;
 
-import org.moomin.statemachine.NoBehaviourState;
+import org.moomin.statemachine.NoBehaviourEventConsumingState;
 
-public class ActiveState extends NoBehaviourState {
+public class ActiveState extends NoBehaviourEventConsumingState {
 
 	public ActiveState(String string) {	}
+
 
 }

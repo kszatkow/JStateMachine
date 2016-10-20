@@ -3,12 +3,13 @@ package org.moomin.statemachine.oddeven;
 import org.moomin.statemachine.TransitionGuard;
 import org.moomin.statemachine.Event;
 
-public class EvenNumberConstraint implements TransitionGuard {
+public class OddNumberGuard implements TransitionGuard {
 
 	@Override
 	public boolean evaluate(Event event) {
 		FeedNumberEvent actualEvent = (FeedNumberEvent) event;
-		return actualEvent.getNumber() %  2 == 0;
+		int number = actualEvent.getNumber();
+		return ((number == 0) ? false : (number %  2 != 0));
 	}
 
 }
