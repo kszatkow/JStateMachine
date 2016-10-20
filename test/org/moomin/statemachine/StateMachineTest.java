@@ -49,10 +49,7 @@ public class StateMachineTest {
 		addTransition(offState, onState, OnEvent.class);
 		addTransition(onState, offState, OffEvent.class);
 				
-		stateMachine.setInitialState(offState);
-		
-		// check initial state
-		assertSame(offState, stateMachine.getActiveState());
+		setInitialStateAndCheckIfActive(offState);
 	
 		// on -> on
 		sendEventAndCheckCurrentState(new OnEvent() , onState);
@@ -77,10 +74,7 @@ public class StateMachineTest {
 		addTransition(oddState, evenState, FeedNumberEvent.class, new EvenNumberConstraint());
 		addTransition(evenState, oddState, Collections.singleton(FeedNumberEvent.class), new OddNumberConstraint());
 				
-		stateMachine.setInitialState(oddState);
-		
-		// check initial state
-		assertSame(oddState, stateMachine.getActiveState());
+		setInitialStateAndCheckIfActive(oddState);
 		
 		// odd -> odd
 		sendEventAndCheckCurrentState(new FeedNumberEvent(11) , oddState);
@@ -109,10 +103,7 @@ public class StateMachineTest {
 		addTransition(evenState, oddState, OddNumberEvent.class);
 		addTransition(evenState, zeroState, ZeroNumberEvent.class);
 		
-		stateMachine.setInitialState(zeroState);
-		
-		// check initial state
-		assertSame(zeroState, stateMachine.getActiveState());
+		setInitialStateAndCheckIfActive(zeroState);
 	
 		// zero -> zero
 		sendEventAndCheckCurrentState(new ZeroNumberEvent() , zeroState);
@@ -148,10 +139,7 @@ public class StateMachineTest {
 		TurnOffEffect turnOffEffect = new TurnOffEffect(offOnSwitch);
 		addTransition(onState, offState, Collections.singletonList(OffEvent.class), turnOffEffect);
 				
-		stateMachine.setInitialState(offState);
-		
-		// check initial state
-		assertSame(offState, stateMachine.getActiveState());	
+		setInitialStateAndCheckIfActive(offState);	
 		assertEquals(false, offOnSwitch.isOn());
 		
 		// turn off
@@ -178,10 +166,7 @@ public class StateMachineTest {
 		addTransition(idleState, activeState, triggerableBy);
 		addTransition(activeState, idleState, IdleTimeoutEvent.class);
 				
-		stateMachine.setInitialState(idleState);
-		
-		// check initial state
-		assertSame(idleState, stateMachine.getActiveState());	
+		setInitialStateAndCheckIfActive(idleState);	
 		
 		// idle -> idle
 		sendEventAndCheckCurrentState(new IdleTimeoutEvent(), idleState);		
@@ -202,10 +187,7 @@ public class StateMachineTest {
 		State idleState = addState(new IdleState("Idle"));
 		addState(new ActiveState("Active"));
 		
-		stateMachine.setInitialState(idleState);
-		
-		// check initial state
-		assertSame(idleState, stateMachine.getActiveState());	
+		setInitialStateAndCheckIfActive(idleState);	
 		
 		// no transition possible
 		sendEventAndCheckCurrentState(new MouseWakeupEvent() , idleState);		
@@ -223,7 +205,7 @@ public class StateMachineTest {
 		State offState = new OffState("Off");
 		State onState = new OnState("On");
 		
-		stateMachine.setInitialState(idleState);
+		setInitialStateAndCheckIfActive(idleState);
 		
 		// prepare exception thrown checker
 		ExceptionThrownIllegalTransitionChecker illegalTransitionChecker = new ExceptionThrownIllegalTransitionChecker(
@@ -309,6 +291,11 @@ public class StateMachineTest {
 	
 	private void addTransition(State source, State target, Set<Class<? extends Event>> triggerableBy, TransitionGuard guard) {
 		stateMachine.addTransition(new Transition(source, target, triggerableBy, guard));
+	}
+	
+	private void setInitialStateAndCheckIfActive(State initialState) {
+		stateMachine.setInitialState(initialState);
+		assertSame(initialState, stateMachine.getActiveState());
 	}
 	
 	private void sendEventAndCheckCurrentState(Event event, State expectedState) {
