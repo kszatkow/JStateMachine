@@ -9,4 +9,9 @@ public class ChoiceState extends NoBehaviourState {
 		return true;
 	}
 
+	@Override
+	public boolean isComposite() {
+		return false;
+	}
+
 }

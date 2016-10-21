@@ -42,4 +42,9 @@ public class IdleStateWithOnEntryAndOnExitBehaviours implements State {
 	public boolean isPassThrough() {
 		return true;
 	}
+
+	@Override
+	public boolean isComposite() {
+		return false;
+	}
 }

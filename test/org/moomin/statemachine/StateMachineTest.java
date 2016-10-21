@@ -33,6 +33,19 @@ import org.moomin.statemachine.onoff.OnState;
 import org.moomin.statemachine.onoff.Switch;
 import org.moomin.statemachine.onoff.TurnOffEffect;
 import org.moomin.statemachine.onoff.TurnOnEffect;
+import org.moomin.statemachine.phone.ConnectEvent;
+import org.moomin.statemachine.phone.ConnectingState;
+import org.moomin.statemachine.phone.DialingFinished;
+import org.moomin.statemachine.phone.DialingState;
+import org.moomin.statemachine.phone.DigitEvent;
+import org.moomin.statemachine.phone.FinishDialingEvent;
+import org.moomin.statemachine.phone.GetDialToneEffect;
+import org.moomin.statemachine.phone.InvalidNumberEvent;
+import org.moomin.statemachine.phone.InvalidNumberState;
+import org.moomin.statemachine.phone.LiftReceiverEvent;
+import org.moomin.statemachine.phone.PartialDial;
+import org.moomin.statemachine.phone.PhoneIdleState;
+import org.moomin.statemachine.phone.StartDialing;
 
 public class StateMachineTest {
 
@@ -494,10 +507,65 @@ public class StateMachineTest {
 		sendEventAndCheckCurrentState(new FeedNumberEvent(15) , oddState);
 	}
 	
+	@Test
+	public void simpleCompositeStateTest() {
+		State phoneIdleState = addState(new PhoneIdleState("PhoneIdle"));
+		SimpleCompositeState dialingState = addSimpleCompositeState(new DialingState("Dialing"));
+		State invalidState = addState(new InvalidNumberState("InvalidNumber"));
+		State connectingState = addState(new ConnectingState("Connecting"));
+		
+		addTransition(phoneIdleState, dialingState, LiftReceiverEvent.class, new GetDialToneEffect());
+		addTransition(dialingState, connectingState, ConnectEvent.class);
+		addTransition(dialingState, invalidState, InvalidNumberEvent.class);
+		
+		State startDialingSubstate = addSubstate(dialingState, new StartDialing("StartDialing"));
+		State partialDialSubstate = addSubstate(dialingState, new PartialDial("PartialDial"));
+		State dialingFinishedSubstate = addSubstate(dialingState, new DialingFinished("DialingFinished"));
+		
+		dialingState.setInitialTransition(new InitialTransition(startDialingSubstate, new InitialTransitionTestEffect()));
+		dialingState.addTransition(new Transition(startDialingSubstate, partialDialSubstate, DigitEvent.class));
+		dialingState.addTransition(new Transition(partialDialSubstate, partialDialSubstate, DigitEvent.class));
+		dialingState.addTransition(new Transition(partialDialSubstate, dialingFinishedSubstate, FinishDialingEvent.class));
+		
+		setInitialTransitionAndActivate(phoneIdleState);
 	
+		// PhoneIdle -> Dialing::StartDialing
+		sendEventAndCheckCurrentState(new LiftReceiverEvent(), dialingState);
+		assertSame(startDialingSubstate, dialingState.getActiveState());
+		
+		// Dialing::StartDialing -> Dialing::PartialDial
+		sendEventAndCheckCurrentState(new DigitEvent(1) , dialingState);
+		assertSame(partialDialSubstate, dialingState.getActiveState());
+		
+		// Dialing::PartialDial -> Dialing::PartialDial
+		sendEventAndCheckCurrentState(new DigitEvent(2) , dialingState);
+		assertSame(partialDialSubstate, dialingState.getActiveState());
+		sendEventAndCheckCurrentState(new DigitEvent(3) , dialingState);
+		assertSame(partialDialSubstate, dialingState.getActiveState());
+		sendEventAndCheckCurrentState(new DigitEvent(4) , dialingState);
+		assertSame(partialDialSubstate, dialingState.getActiveState());
+		
+		// Dialing::PartialDial -> Dialing::DialingFinished
+		sendEventAndCheckCurrentState(new FinishDialingEvent() , dialingState);
+		assertSame(dialingFinishedSubstate, dialingState.getActiveState());
+		
+		// Dialing::Finished -> Connecting
+		sendEventAndCheckCurrentState(new ConnectEvent() , connectingState);
+	}
+
+	private State addSubstate(PrimitiveStateMachine compositeState, State substate) {
+		compositeState.addState(substate);
+		return substate;
+	}
+	
+
 	private State addState(State state) {
 		stateMachine.addState(state);
 		return state;
+	}
+	
+	private SimpleCompositeState addSimpleCompositeState(SimpleCompositeState state) {
+		return (SimpleCompositeState) addState(state);
 	}
 	
 	private void addTransition(State source, State target, Class<? extends Event> triggerableBy) {

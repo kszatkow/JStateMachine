@@ -9,7 +9,13 @@ public interface State {
 		@Override
 		public boolean isPassThrough() {
 			return true;
-	}};
+		}
+		
+		@Override
+		public boolean isComposite() {
+			return false;
+		}
+	};
 	
 	public void onEntry();
 	
@@ -18,5 +24,7 @@ public interface State {
 	public void onExit();
 	
 	public boolean isPassThrough();
+	
+	public boolean isComposite();
 
 }

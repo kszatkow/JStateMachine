@@ -6,5 +6,10 @@ public class NoBehaviourEventConsumingState extends NoBehaviourState {
 	public boolean isPassThrough() {
 		return false;
 	}
+
+	@Override
+	public boolean isComposite() {
+		return false;
+	}
 	
 }

@@ -33,4 +33,9 @@ public class ActiveStateWithDoActionBehaviour implements State {
 		return true;
 	}
 
+	@Override
+	public boolean isComposite() {
+		return false;
+	}
+
 }
