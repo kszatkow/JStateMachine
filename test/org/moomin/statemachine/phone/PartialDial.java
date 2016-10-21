@@ -8,25 +8,21 @@ public class PartialDial implements State {
 
 	@Override
 	public void onEntry() {
-		// TODO Auto-generated method stub
-
+		// TODO add number handling implementation
 	}
 
 	@Override
 	public void doAction() {
-		// TODO Auto-generated method stub
-
+		// empty on purpose
 	}
 
 	@Override
 	public void onExit() {
-		// TODO Auto-generated method stub
-
+		// empty on purpose
 	}
 
 	@Override
 	public boolean isPassThrough() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

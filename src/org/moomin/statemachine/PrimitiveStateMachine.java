@@ -90,6 +90,10 @@ public class PrimitiveStateMachine {
 
 	private void fireTransition(InitialTransition transition) {
 		activeState.onExit();
+		if (activeState.isComposite()) {
+			SimpleCompositeState activeCompositeState = (SimpleCompositeState) activeState;
+			activeCompositeState.reset();
+		}
 		transition.takeEffect();
 		activeState = transition.target();
 		activeState.onEntry();
@@ -117,5 +121,10 @@ public class PrimitiveStateMachine {
 		if (!isActive) {
 			throw new IllegalStateException(exceptionMessage);
 		}
+	}
+	
+	protected void deactivate() {
+		isActive = false;
+		activeState = State.NULL_STATE;
 	}
 }

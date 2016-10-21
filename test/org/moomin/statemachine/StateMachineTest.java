@@ -39,7 +39,7 @@ import org.moomin.statemachine.phone.DialingFinished;
 import org.moomin.statemachine.phone.DialingState;
 import org.moomin.statemachine.phone.DigitEvent;
 import org.moomin.statemachine.phone.FinishDialingEvent;
-import org.moomin.statemachine.phone.GetDialToneEffect;
+import org.moomin.statemachine.phone.HangUpEvent;
 import org.moomin.statemachine.phone.InvalidNumberEvent;
 import org.moomin.statemachine.phone.InvalidNumberState;
 import org.moomin.statemachine.phone.LiftReceiverEvent;
@@ -514,11 +514,13 @@ public class StateMachineTest {
 		State invalidState = addState(new InvalidNumberState("InvalidNumber"));
 		State connectingState = addState(new ConnectingState("Connecting"));
 		
-		addTransition(phoneIdleState, dialingState, LiftReceiverEvent.class, new GetDialToneEffect());
+		addTransition(phoneIdleState, dialingState, LiftReceiverEvent.class);
 		addTransition(dialingState, connectingState, ConnectEvent.class);
 		addTransition(dialingState, invalidState, InvalidNumberEvent.class);
+		addTransition(invalidState, phoneIdleState, HangUpEvent.class);
+		addTransition(connectingState, phoneIdleState, HangUpEvent.class);
 		
-		State startDialingSubstate = addSubstate(dialingState, new StartDialing("StartDialing"));
+		StartDialing startDialingSubstate = (StartDialing) addSubstate(dialingState, new StartDialing("StartDialing"));
 		State partialDialSubstate = addSubstate(dialingState, new PartialDial("PartialDial"));
 		State dialingFinishedSubstate = addSubstate(dialingState, new DialingFinished("DialingFinished"));
 		
@@ -532,10 +534,12 @@ public class StateMachineTest {
 		// PhoneIdle -> Dialing::StartDialing
 		sendEventAndCheckCurrentState(new LiftReceiverEvent(), dialingState);
 		assertSame(startDialingSubstate, dialingState.getActiveState());
+		assertTrue(startDialingSubstate.isDialToneOn());
 		
 		// Dialing::StartDialing -> Dialing::PartialDial
 		sendEventAndCheckCurrentState(new DigitEvent(1) , dialingState);
 		assertSame(partialDialSubstate, dialingState.getActiveState());
+		assertFalse(startDialingSubstate.isDialToneOn());
 		
 		// Dialing::PartialDial -> Dialing::PartialDial
 		sendEventAndCheckCurrentState(new DigitEvent(2) , dialingState);
@@ -551,6 +555,27 @@ public class StateMachineTest {
 		
 		// Dialing::Finished -> Connecting
 		sendEventAndCheckCurrentState(new ConnectEvent() , connectingState);
+		
+		// Connecting -> PhoneIdle
+		sendEventAndCheckCurrentState(new HangUpEvent() , phoneIdleState);
+		
+		// PhoneIdle -> Dialing::StartDialing
+		sendEventAndCheckCurrentState(new LiftReceiverEvent(), dialingState);
+		assertSame(startDialingSubstate, dialingState.getActiveState());
+		
+		// Dialing::PartialDial -> Dialing::PartialDial
+		sendEventAndCheckCurrentState(new DigitEvent(2) , dialingState);
+		assertSame(partialDialSubstate, dialingState.getActiveState());
+		
+		// Dialing::PartialDial -> Dialing::DialingFinished
+		sendEventAndCheckCurrentState(new FinishDialingEvent() , dialingState);
+		assertSame(dialingFinishedSubstate, dialingState.getActiveState());
+		
+		// Dialing::Finished -> InvalidNumber
+		sendEventAndCheckCurrentState(new InvalidNumberEvent() , invalidState);
+		
+		// InvalidNumber -> PhoneIdle
+		sendEventAndCheckCurrentState(new HangUpEvent() , phoneIdleState);
 	}
 
 	private State addSubstate(PrimitiveStateMachine compositeState, State substate) {

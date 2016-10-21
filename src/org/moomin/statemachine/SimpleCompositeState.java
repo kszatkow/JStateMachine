@@ -11,4 +11,8 @@ public abstract class SimpleCompositeState extends PrimitiveStateMachine impleme
 	public boolean isComposite() {
 		return true;
 	}
+
+	public void reset() {
+		deactivate();
+	}
 }

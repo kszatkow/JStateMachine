@@ -4,24 +4,23 @@ import org.moomin.statemachine.State;
 
 public class StartDialing implements State {
 
+	private ToneDialer toneDialer = new ToneDialer();
+	
 	public StartDialing(String string) {}
 
 	@Override
 	public void onEntry() {
-		// TODO Auto-generated method stub
-		
+		toneDialer.startDialTone();
 	}
 
 	@Override
 	public void doAction() {
-		// TODO Auto-generated method stub
-		
+		// empty on purpose
 	}
 
 	@Override
 	public void onExit() {
-		// TODO Auto-generated method stub
-		
+		toneDialer.stopDialTone();
 	}
 
 	@Override
@@ -34,4 +33,7 @@ public class StartDialing implements State {
 		return false;
 	}
 
+	public boolean isDialToneOn() {
+		return toneDialer.isDialToneOn();
+	}
 }
