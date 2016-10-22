@@ -1,8 +1,8 @@
 package org.moomin.statemachine.phone;
 
-import org.moomin.statemachine.State;
+import org.moomin.statemachine.SimpleState;
 
-public class DialingFinished extends State {
+public class DialingFinished extends SimpleState {
 
 	public DialingFinished(String string) {}
 

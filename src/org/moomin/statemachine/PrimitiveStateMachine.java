@@ -81,8 +81,8 @@ public class PrimitiveStateMachine implements Region {
 				activeCompositeState.dispatchEvent(event);
 				activeCompositeState.processEvent();
 			}
+			// TODO - shouldn't it go back to while at this point? Test to be written to check
 			
-			//TODO - how to process transition without a trigger?
 			List<Transition> outgoingFromActiveState = transitions.get(activeState);
 			for (Transition transition : outgoingFromActiveState) {
 				if( isTransitionEnabled(event, transition) ) {
@@ -108,19 +108,10 @@ public class PrimitiveStateMachine implements Region {
 
 	private void fireTransition(InitialTransition transition) {
 		activeState.onExit();
-		if (activeState.isComposite()) {
-			SimpleCompositeState activeCompositeState = (SimpleCompositeState) activeState;
-			// TODO - can't it be handled by onExit?
-			activeCompositeState.deactivate();
-		}
 		transition.takeEffect();
 		activeState = transition.target();
 		activeState.onEntry();
 		activeState.doAction();
-		if (activeState.isComposite()) {
-			SimpleCompositeState activeCompositeState = (SimpleCompositeState) activeState;
-			activeCompositeState.activate();
-		}
 	}
 
 	@Override

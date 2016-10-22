@@ -29,6 +29,7 @@ public abstract class State {
 
 	
 	public final void onEntry() {
+		activate();
 		onEntryBehaviour();
 	}
 	
@@ -39,9 +40,14 @@ public abstract class State {
 	
 	public final void onExit() {
 		onExitBehaviour();
+		deactivate();
 	}
 
 
+	public abstract void activate();
+
+	public abstract void deactivate();
+	
 	protected abstract void onEntryBehaviour();
 	
 	protected abstract void doActionBehaviour();

@@ -1,8 +1,8 @@
 package org.moomin.statemachine.idleactive;
 
-import org.moomin.statemachine.State;
+import org.moomin.statemachine.SimpleState;
 
-public class ActiveStateWithDoActionBehaviour extends State {
+public class ActiveStateWithDoActionBehaviour extends SimpleState {
 
 	private boolean onActionDone = false;
 	

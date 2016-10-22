@@ -1,8 +1,8 @@
 package org.moomin.statemachine.phone;
 
-import org.moomin.statemachine.State;
+import org.moomin.statemachine.SimpleState;
 
-public class PartialDial extends State {
+public class PartialDial extends SimpleState {
 
 	public PartialDial(String string) {}
 

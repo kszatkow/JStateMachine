@@ -1,8 +1,8 @@
 package org.moomin.statemachine.onoff;
 
-import org.moomin.statemachine.State;
+import org.moomin.statemachine.SimpleState;
 
-public class OffProxyState extends State {
+public class OffProxyState extends SimpleState {
 
 	public OffProxyState(String string) {}
 

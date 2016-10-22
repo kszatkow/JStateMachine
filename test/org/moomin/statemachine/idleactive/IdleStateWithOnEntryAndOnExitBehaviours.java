@@ -1,8 +1,8 @@
 package org.moomin.statemachine.idleactive;
 
-import org.moomin.statemachine.State;
+import org.moomin.statemachine.SimpleState;
 
-public class IdleStateWithOnEntryAndOnExitBehaviours extends State {
+public class IdleStateWithOnEntryAndOnExitBehaviours extends SimpleState {
 
 	private boolean onEntryDone = false;
 	

@@ -1,8 +1,8 @@
 package org.moomin.statemachine.phone;
 
-import org.moomin.statemachine.State;
+import org.moomin.statemachine.SimpleState;
 
-public class StartDialing extends State {
+public class StartDialing extends SimpleState {
 
 	private ToneDialer toneDialer = new ToneDialer();
 	
