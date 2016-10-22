@@ -81,17 +81,17 @@ public class StateMachineTest {
 		setInitialTransitionAndActivate(offState);
 	
 		// off -> on
-		sendEventAndCheckCurrentState(new OnEvent() , onState);
+		dispatchThenProcessEventAndCheckActiveState(new OnEvent() , onState);
 		// no transition - unhandled event
-		sendEventAndCheckCurrentState(new UnhandledEvent() , onState);
+		dispatchThenProcessEventAndCheckActiveState(new UnhandledEvent() , onState);
 		// on -> off
-		sendEventAndCheckCurrentState(new OffEvent() , offState);
+		dispatchThenProcessEventAndCheckActiveState(new OffEvent() , offState);
 		// off -> off
-		sendEventAndCheckCurrentState(new OffEvent() , offState);
+		dispatchThenProcessEventAndCheckActiveState(new OffEvent() , offState);
 		// no transition - unhandled event
-		sendEventAndCheckCurrentState(new UnhandledEvent() , offState);
+		dispatchThenProcessEventAndCheckActiveState(new UnhandledEvent() , offState);
 		// off -> on
-		sendEventAndCheckCurrentState(new OnEvent() , onState);
+		dispatchThenProcessEventAndCheckActiveState(new OnEvent() , onState);
 	}
 
 	@Test
@@ -108,9 +108,9 @@ public class StateMachineTest {
 		setInitialTransitionAndActivate(offState);
 	
 		// off -> on
-		sendEventAndCheckCurrentState(new OnEvent() , onState);
+		dispatchThenProcessEventAndCheckActiveState(new OnEvent() , onState);
 		// on -> off
-		sendEventAndCheckCurrentState(new OffEvent() , offState);
+		dispatchThenProcessEventAndCheckActiveState(new OffEvent() , offState);
 	}
 	
 	@Test
@@ -125,17 +125,17 @@ public class StateMachineTest {
 		setInitialTransitionAndActivate(oddState);
 		
 		// odd -> odd
-		sendEventAndCheckCurrentState(new FeedNumberEvent(11) , oddState);
+		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(11) , oddState);
 		// no transition - unhandled event
-		sendEventAndCheckCurrentState(new UnhandledEvent() , oddState);
+		dispatchThenProcessEventAndCheckActiveState(new UnhandledEvent() , oddState);
 		// odd -> even
-		sendEventAndCheckCurrentState(new FeedNumberEvent(4) , evenState);
+		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(4) , evenState);
 		// even -> even
-		sendEventAndCheckCurrentState(new FeedNumberEvent(10) , evenState);
+		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(10) , evenState);
 		// no transition - unhandled event
-		sendEventAndCheckCurrentState(new UnhandledEvent() , evenState);
+		dispatchThenProcessEventAndCheckActiveState(new UnhandledEvent() , evenState);
 		// even -> odd
-		sendEventAndCheckCurrentState(new FeedNumberEvent(5) , oddState);
+		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(5) , oddState);
 	}
 
 	@Test
@@ -154,25 +154,25 @@ public class StateMachineTest {
 		setInitialTransitionAndActivate(zeroState);
 	
 		// zero -> zero
-		sendEventAndCheckCurrentState(new ZeroNumberEvent() , zeroState);
+		dispatchThenProcessEventAndCheckActiveState(new ZeroNumberEvent() , zeroState);
 		// zero -> odd
-		sendEventAndCheckCurrentState(new OddNumberEvent() , oddState);
+		dispatchThenProcessEventAndCheckActiveState(new OddNumberEvent() , oddState);
 		// odd -> odd
-		sendEventAndCheckCurrentState(new OddNumberEvent() , oddState);
+		dispatchThenProcessEventAndCheckActiveState(new OddNumberEvent() , oddState);
 		// odd -> zero
-		sendEventAndCheckCurrentState(new ZeroNumberEvent() , zeroState);
+		dispatchThenProcessEventAndCheckActiveState(new ZeroNumberEvent() , zeroState);
 		// zero -> even
-		sendEventAndCheckCurrentState(new EvenNumberEvent() , evenState);
+		dispatchThenProcessEventAndCheckActiveState(new EvenNumberEvent() , evenState);
 		// even -> even
-		sendEventAndCheckCurrentState(new EvenNumberEvent() , evenState);
+		dispatchThenProcessEventAndCheckActiveState(new EvenNumberEvent() , evenState);
 		// even -> zero
-		sendEventAndCheckCurrentState(new ZeroNumberEvent() , zeroState);
+		dispatchThenProcessEventAndCheckActiveState(new ZeroNumberEvent() , zeroState);
 		// zero -> odd
-		sendEventAndCheckCurrentState(new OddNumberEvent() , oddState);
+		dispatchThenProcessEventAndCheckActiveState(new OddNumberEvent() , oddState);
 		// odd -> even
-		sendEventAndCheckCurrentState(new EvenNumberEvent() , evenState);
+		dispatchThenProcessEventAndCheckActiveState(new EvenNumberEvent() , evenState);
 		// even -> odd
-		sendEventAndCheckCurrentState(new OddNumberEvent() , oddState);
+		dispatchThenProcessEventAndCheckActiveState(new OddNumberEvent() , oddState);
 	}
 	
 	@Test
@@ -191,15 +191,15 @@ public class StateMachineTest {
 		assertEquals(false, offOnSwitch.isOn());
 		
 		// turn off
-		sendEventAndCheckCurrentState(new OffEvent(), offState);
+		dispatchThenProcessEventAndCheckActiveState(new OffEvent(), offState);
 		assertEquals(false, offOnSwitch.isOn());
 		
 		// turn on
-		sendEventAndCheckCurrentState(new OnEvent(), onState);
+		dispatchThenProcessEventAndCheckActiveState(new OnEvent(), onState);
 		assertEquals(true, offOnSwitch.isOn());
 
 		// turn off
-		sendEventAndCheckCurrentState(new OffEvent(), offState);
+		dispatchThenProcessEventAndCheckActiveState(new OffEvent(), offState);
 		assertEquals(false, offOnSwitch.isOn());
 	}
 	
@@ -217,30 +217,45 @@ public class StateMachineTest {
 		setInitialTransitionAndActivate(idleState);	
 		
 		// idle -> idle
-		sendEventAndCheckCurrentState(new IdleTimeoutEvent(), idleState);		
+		dispatchThenProcessEventAndCheckActiveState(new IdleTimeoutEvent(), idleState);		
 		// idle -> active (key event)
-		sendEventAndCheckCurrentState(new KeyWakeupEvent(), activeState);
+		dispatchThenProcessEventAndCheckActiveState(new KeyWakeupEvent(), activeState);
 		// active -> idle
-		sendEventAndCheckCurrentState(new IdleTimeoutEvent(), idleState);	
+		dispatchThenProcessEventAndCheckActiveState(new IdleTimeoutEvent(), idleState);	
 		// idle -> active (mouse event)
-		sendEventAndCheckCurrentState(new MouseWakeupEvent(), activeState);
+		dispatchThenProcessEventAndCheckActiveState(new MouseWakeupEvent(), activeState);
 		// active -> idle
-		sendEventAndCheckCurrentState(new IdleTimeoutEvent(), idleState);	
+		dispatchThenProcessEventAndCheckActiveState(new IdleTimeoutEvent(), idleState);	
 		// no transition - unhandled event
-		sendEventAndCheckCurrentState(new UnhandledEvent(), idleState);
+		dispatchThenProcessEventAndCheckActiveState(new UnhandledEvent(), idleState);
 	}
 	
 	@Test
 	public void twoStatesNoTransitionTest() {
+		State idleState = addState(new IdleState("Idle"));
+		State activeState = addState(new ActiveState("Active"));
+		
+		addTransition(idleState, activeState, KeyWakeupEvent.class);
+		addTransition(activeState, idleState, IdleTimeoutEvent.class);
+		
+		setInitialTransitionAndActivate(idleState);	
+		
+		// no event dispatched - no transition
+		stateMachine.processEvent();
+		assertSame(idleState, stateMachine.getActiveState());
+	}
+	
+	@Test
+	public void processUndispatchedEvent() {
 		State idleState = addState(new IdleState("Idle"));
 		addState(new ActiveState("Active"));
 		
 		setInitialTransitionAndActivate(idleState);	
 		
 		// no transition possible
-		sendEventAndCheckCurrentState(new MouseWakeupEvent() , idleState);		
+		dispatchThenProcessEventAndCheckActiveState(new MouseWakeupEvent() , idleState);		
 		// no transition possible
-		sendEventAndCheckCurrentState(new KeyWakeupEvent() , idleState);
+		dispatchThenProcessEventAndCheckActiveState(new KeyWakeupEvent() , idleState);
 	}
 	
 	@Test
@@ -409,7 +424,7 @@ public class StateMachineTest {
 				"Exception should have been thrown - illegal event processing.") {
 					@Override
 					protected void doAction() {
-						stateMachine.processEvent(new IdleTimeoutEvent());
+						stateMachine.processEvent();
 					}
 		};
 		
@@ -459,13 +474,13 @@ public class StateMachineTest {
 		assertFalse(activeState.hasOnActionBeenExecuted());
 		
 		// transition to active state - onExit of source state and onAction of target state executed
-		sendEventAndCheckCurrentState(new KeyWakeupEvent() , activeState);
+		dispatchThenProcessEventAndCheckActiveState(new KeyWakeupEvent() , activeState);
 		assertFalse(idleState.hasOnEntryBeenExecuted());
 		assertTrue(idleState.hasOnExitBeenExecuted());
 		assertTrue(activeState.hasOnActionBeenExecuted());
 		
 		// transition back to idle state - onEntry of target state executed
-		sendEventAndCheckCurrentState(new IdleTimeoutEvent() , idleState);
+		dispatchThenProcessEventAndCheckActiveState(new IdleTimeoutEvent() , idleState);
 		assertTrue(idleState.hasOnEntryBeenExecuted());
 	}
 	
@@ -486,25 +501,25 @@ public class StateMachineTest {
 		setInitialTransitionAndActivate(zeroState);
 	
 		// zero -> zero
-		sendEventAndCheckCurrentState(new FeedNumberEvent(0) , zeroState);
+		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(0) , zeroState);
 		// zero -> odd
-		sendEventAndCheckCurrentState(new FeedNumberEvent(3) , oddState);
+		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(3) , oddState);
 		// odd -> odd
-		sendEventAndCheckCurrentState(new FeedNumberEvent(5) , oddState);
+		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(5) , oddState);
 		// odd -> zero
-		sendEventAndCheckCurrentState(new FeedNumberEvent(0) , zeroState);
+		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(0) , zeroState);
 		// zero -> even
-		sendEventAndCheckCurrentState(new FeedNumberEvent(2) , evenState);
+		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(2) , evenState);
 		// even -> even
-		sendEventAndCheckCurrentState(new FeedNumberEvent(12) , evenState);
+		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(12) , evenState);
 		// even -> zero
-		sendEventAndCheckCurrentState(new FeedNumberEvent(0) , zeroState);
+		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(0) , zeroState);
 		// zero -> odd
-		sendEventAndCheckCurrentState(new FeedNumberEvent(13) , oddState);
+		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(13) , oddState);
 		// odd -> even
-		sendEventAndCheckCurrentState(new FeedNumberEvent(18) , evenState);
+		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(18) , evenState);
 		// even -> odd
-		sendEventAndCheckCurrentState(new FeedNumberEvent(15) , oddState);
+		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(15) , oddState);
 	}
 	
 	@Test
@@ -532,50 +547,50 @@ public class StateMachineTest {
 		setInitialTransitionAndActivate(phoneIdleState);
 	
 		// PhoneIdle -> Dialing::StartDialing
-		sendEventAndCheckCurrentState(new LiftReceiverEvent(), dialingState);
+		dispatchThenProcessEventAndCheckActiveState(new LiftReceiverEvent(), dialingState);
 		assertSame(startDialingSubstate, dialingState.getActiveState());
 		assertTrue(startDialingSubstate.isDialToneOn());
 		
 		// Dialing::StartDialing -> Dialing::PartialDial
-		sendEventAndCheckCurrentState(new DigitEvent(1) , dialingState);
+		dispatchThenProcessEventAndCheckActiveState(new DigitEvent(1) , dialingState);
 		assertSame(partialDialSubstate, dialingState.getActiveState());
 		assertFalse(startDialingSubstate.isDialToneOn());
 		
 		// Dialing::PartialDial -> Dialing::PartialDial
-		sendEventAndCheckCurrentState(new DigitEvent(2) , dialingState);
+		dispatchThenProcessEventAndCheckActiveState(new DigitEvent(2) , dialingState);
 		assertSame(partialDialSubstate, dialingState.getActiveState());
-		sendEventAndCheckCurrentState(new DigitEvent(3) , dialingState);
+		dispatchThenProcessEventAndCheckActiveState(new DigitEvent(3) , dialingState);
 		assertSame(partialDialSubstate, dialingState.getActiveState());
-		sendEventAndCheckCurrentState(new DigitEvent(4) , dialingState);
+		dispatchThenProcessEventAndCheckActiveState(new DigitEvent(4) , dialingState);
 		assertSame(partialDialSubstate, dialingState.getActiveState());
 		
 		// Dialing::PartialDial -> Dialing::DialingFinished
-		sendEventAndCheckCurrentState(new FinishDialingEvent() , dialingState);
+		dispatchThenProcessEventAndCheckActiveState(new FinishDialingEvent() , dialingState);
 		assertSame(dialingFinishedSubstate, dialingState.getActiveState());
 		
 		// Dialing::Finished -> Connecting
-		sendEventAndCheckCurrentState(new ConnectEvent() , connectingState);
+		dispatchThenProcessEventAndCheckActiveState(new ConnectEvent() , connectingState);
 		
 		// Connecting -> PhoneIdle
-		sendEventAndCheckCurrentState(new HangUpEvent() , phoneIdleState);
+		dispatchThenProcessEventAndCheckActiveState(new HangUpEvent() , phoneIdleState);
 		
 		// PhoneIdle -> Dialing::StartDialing
-		sendEventAndCheckCurrentState(new LiftReceiverEvent(), dialingState);
+		dispatchThenProcessEventAndCheckActiveState(new LiftReceiverEvent(), dialingState);
 		assertSame(startDialingSubstate, dialingState.getActiveState());
 		
 		// Dialing::PartialDial -> Dialing::PartialDial
-		sendEventAndCheckCurrentState(new DigitEvent(2) , dialingState);
+		dispatchThenProcessEventAndCheckActiveState(new DigitEvent(2) , dialingState);
 		assertSame(partialDialSubstate, dialingState.getActiveState());
 		
 		// Dialing::PartialDial -> Dialing::DialingFinished
-		sendEventAndCheckCurrentState(new FinishDialingEvent() , dialingState);
+		dispatchThenProcessEventAndCheckActiveState(new FinishDialingEvent() , dialingState);
 		assertSame(dialingFinishedSubstate, dialingState.getActiveState());
 		
 		// Dialing::Finished -> InvalidNumber
-		sendEventAndCheckCurrentState(new InvalidNumberEvent() , invalidState);
+		dispatchThenProcessEventAndCheckActiveState(new InvalidNumberEvent() , invalidState);
 		
 		// InvalidNumber -> PhoneIdle
-		sendEventAndCheckCurrentState(new HangUpEvent() , phoneIdleState);
+		dispatchThenProcessEventAndCheckActiveState(new HangUpEvent() , phoneIdleState);
 	}
 
 	private State addSubstate(PrimitiveStateMachine compositeState, State substate) {
@@ -635,11 +650,11 @@ public class StateMachineTest {
 	
 	private void setInitialTransition(State target, TransitionEffect effect) {
 		stateMachine.setInitialTransition(new InitialTransition(target, effect));
-		
 	}
 	
-	private void sendEventAndCheckCurrentState(Event event, State expectedState) {
-		stateMachine.processEvent(event);
+	private void dispatchThenProcessEventAndCheckActiveState(Event event, State expectedState) {
+		stateMachine.dispatchEvent(event);
+		stateMachine.processEvent();
 		assertSame(expectedState, stateMachine.getActiveState());
 	}
 }

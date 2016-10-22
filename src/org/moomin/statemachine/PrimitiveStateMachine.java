@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 public class PrimitiveStateMachine {
@@ -14,6 +15,7 @@ public class PrimitiveStateMachine {
 	private Set<State> states = new HashSet<State>();
 	private Map<State, List<Transition>> transitions = new HashMap<>();
 	private State activeState = State.NULL_STATE;
+	private Queue<Event> eventQueue = new LinkedList<>();;
 
 	public PrimitiveStateMachine() {
 		super();
@@ -62,12 +64,18 @@ public class PrimitiveStateMachine {
 		return activeState;
 	}
 
-	public void processEvent(Event event) {
+	public void processEvent() {
 		throwIfInIllegalInactiveState("Even processing not allowed when state machine is inactive, activate first.");
+		
+		Event event = eventQueue.poll();
+		if (event == null) {
+			return;
+		}
 		
 		if (activeState.isComposite()) {
 			SimpleCompositeState activeCompositeState = (SimpleCompositeState) activeState;
-			activeCompositeState.processEvent(event);
+			activeCompositeState.dispatchEvent(event);
+			activeCompositeState.processEvent();
 		}
 		
 		//TODO - how to process transition without a trigger?
@@ -76,7 +84,8 @@ public class PrimitiveStateMachine {
 			if( isTransitionEnabled(event, transition) ) {
 				fireTransition(transition);
 				if (activeState.isPassThrough()) {
-					processEvent(event);
+					dispatchEvent(event);
+					processEvent();
 				}
 				break ;
 			}
@@ -126,5 +135,9 @@ public class PrimitiveStateMachine {
 	protected void deactivate() {
 		isActive = false;
 		activeState = State.NULL_STATE;
+	}
+
+	public void dispatchEvent(Event event) {
+		eventQueue.add(event);
 	}
 }
