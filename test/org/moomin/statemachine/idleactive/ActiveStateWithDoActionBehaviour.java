@@ -2,25 +2,25 @@ package org.moomin.statemachine.idleactive;
 
 import org.moomin.statemachine.State;
 
-public class ActiveStateWithDoActionBehaviour implements State {
+public class ActiveStateWithDoActionBehaviour extends State {
 
 	private boolean onActionDone = false;
 	
 	public ActiveStateWithDoActionBehaviour(String name) {}
 	
 	@Override
-	public void onEntry() {
+	public void onEntryBehaviour() {
 		// empty on purpose
 
 	}
 
 	@Override
-	public void doAction() {
+	public void doActionBehaviour() {
 		onActionDone = true;
 	}
 
 	@Override
-	public void onExit() {
+	public void onExitBehaviour() {
 		// empty on purpose
 	}
 

@@ -2,24 +2,24 @@ package org.moomin.statemachine.onoff;
 
 import org.moomin.statemachine.State;
 
-public class OffProxyState implements State {
+public class OffProxyState extends State {
 
 	public OffProxyState(String string) {}
 
 	@Override
-	public void onEntry() {
+	public void onEntryBehaviour() {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void doAction() {
+	public void doActionBehaviour() {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void onExit() {
+	public void onExitBehaviour() {
 		// TODO Auto-generated method stub
 
 	}

@@ -2,24 +2,24 @@ package org.moomin.statemachine.phone;
 
 import org.moomin.statemachine.State;
 
-public class DialingFinished implements State {
+public class DialingFinished extends State {
 
 	public DialingFinished(String string) {}
 
 	@Override
-	public void onEntry() {
+	public void onEntryBehaviour() {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void doAction() {
+	public void doActionBehaviour() {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void onExit() {
+	public void onExitBehaviour() {
 		// TODO Auto-generated method stub
 
 	}

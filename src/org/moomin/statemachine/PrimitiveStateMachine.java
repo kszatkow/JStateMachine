@@ -1,11 +1,11 @@
 package org.moomin.statemachine;
 
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 
 public class PrimitiveStateMachine {
@@ -15,7 +15,7 @@ public class PrimitiveStateMachine {
 	private Set<State> states = new HashSet<State>();
 	private Map<State, List<Transition>> transitions = new HashMap<>();
 	private State activeState = State.NULL_STATE;
-	private Queue<Event> eventQueue = new LinkedList<>();;
+	private Deque<Event> eventQueue = new LinkedList<>();;
 
 	public PrimitiveStateMachine() {
 		super();
@@ -67,29 +67,31 @@ public class PrimitiveStateMachine {
 	public void processEvent() {
 		throwIfInIllegalInactiveState("Even processing not allowed when state machine is inactive, activate first.");
 		
-		Event event = eventQueue.poll();
-		if (event == null) {
-			return;
-		}
-		
-		if (activeState.isComposite()) {
-			SimpleCompositeState activeCompositeState = (SimpleCompositeState) activeState;
-			activeCompositeState.dispatchEvent(event);
-			activeCompositeState.processEvent();
-		}
-		
-		//TODO - how to process transition without a trigger?
-		List<Transition> outgoingFromActiveState = transitions.get(activeState);
-		for (Transition transition : outgoingFromActiveState) {
-			if( isTransitionEnabled(event, transition) ) {
-				fireTransition(transition);
-				if (activeState.isPassThrough()) {
-					dispatchEvent(event);
-					processEvent();
+		while (!eventQueue.isEmpty()) {
+			Event event = eventQueue.poll();
+			
+			if (activeState.isComposite()) {
+				SimpleCompositeState activeCompositeState = (SimpleCompositeState) activeState;
+				activeCompositeState.dispatchEvent(event);
+				activeCompositeState.processEvent();
+			}
+			
+			//TODO - how to process transition without a trigger?
+			List<Transition> outgoingFromActiveState = transitions.get(activeState);
+			for (Transition transition : outgoingFromActiveState) {
+				if( isTransitionEnabled(event, transition) ) {
+					fireTransition(transition);
+					if (activeState.isPassThrough()) {
+						dispatchEventToQueueFront(event);
+					}
+					break ;
 				}
-				break ;
 			}
 		}
+	}
+
+	private void dispatchEventToQueueFront(Event event) {
+		eventQueue.addFirst(event);
 	}
 
 	private boolean isTransitionEnabled(Event event, Transition transition) {
@@ -101,6 +103,7 @@ public class PrimitiveStateMachine {
 		activeState.onExit();
 		if (activeState.isComposite()) {
 			SimpleCompositeState activeCompositeState = (SimpleCompositeState) activeState;
+			// TODO - can't it be handled by onExit?
 			activeCompositeState.reset();
 		}
 		transition.takeEffect();
@@ -138,6 +141,6 @@ public class PrimitiveStateMachine {
 	}
 
 	public void dispatchEvent(Event event) {
-		eventQueue.add(event);
+		eventQueue.addLast(event);
 	}
 }

@@ -7,12 +7,12 @@ public class DialingState extends SimpleCompositeState {
 	public DialingState(String string) {}
 
 	@Override
-	public void onEntry() {}
+	public void onEntryBehaviour() {}
 	
 	@Override
-	public void doAction() {}
+	public void doActionBehaviour() {}
 
 	@Override
-	public void onExit() {}
+	public void onExitBehaviour() {}
 
 }

@@ -2,7 +2,7 @@ package org.moomin.statemachine.idleactive;
 
 import org.moomin.statemachine.State;
 
-public class IdleStateWithOnEntryAndOnExitBehaviours implements State {
+public class IdleStateWithOnEntryAndOnExitBehaviours extends State {
 
 	private boolean onEntryDone = false;
 	
@@ -11,17 +11,17 @@ public class IdleStateWithOnEntryAndOnExitBehaviours implements State {
 	public IdleStateWithOnEntryAndOnExitBehaviours(String name) {}
 	
 	@Override
-	public void onEntry() {
+	public void onEntryBehaviour() {
 		onEntryDone = true;
 	}
 
 	@Override
-	public void doAction() {
+	public void doActionBehaviour() {
 		// empty on purpose
 	}
 
 	@Override
-	public void onExit() {
+	public void onExitBehaviour() {
 		onExitDone = true;
 	}
 

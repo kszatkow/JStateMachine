@@ -620,7 +620,7 @@ public class StateMachineTest {
 		dispatchThenProcessEventAndCheckActiveState(new HangUpEvent() , phoneIdleState);
 	}
 
-	private State addSubstate(PrimitiveStateMachine compositeState, State substate) {
+	private State addSubstate(SimpleCompositeState compositeState, State substate) {
 		compositeState.addState(substate);
 		return substate;
 	}

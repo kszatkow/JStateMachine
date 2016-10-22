@@ -1,6 +1,6 @@
 package org.moomin.statemachine;
 
-public interface State {
+public abstract class State {
 
 	/* 
 	 * Null object design pattern.
@@ -17,14 +17,29 @@ public interface State {
 		}
 	};
 	
-	public void onEntry();
 	
-	public void doAction();
+	public abstract boolean isPassThrough();
 	
-	public void onExit();
+	public abstract boolean isComposite();
+
 	
-	public boolean isPassThrough();
+	public final void onEntry() {
+		onEntryBehaviour();
+	}
 	
-	public boolean isComposite();
+	public final void doAction() {
+		doActionBehaviour();
+	}
+	
+	public final void onExit() {
+		onExitBehaviour();
+	}
+
+
+	protected abstract void onEntryBehaviour();
+	
+	protected abstract void doActionBehaviour();
+	
+	protected abstract void onExitBehaviour();
 
 }

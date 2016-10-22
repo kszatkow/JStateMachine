@@ -2,24 +2,24 @@ package org.moomin.statemachine.phone;
 
 import org.moomin.statemachine.State;
 
-public class StartDialing implements State {
+public class StartDialing extends State {
 
 	private ToneDialer toneDialer = new ToneDialer();
 	
 	public StartDialing(String string) {}
 
 	@Override
-	public void onEntry() {
+	public void onEntryBehaviour() {
 		toneDialer.startDialTone();
 	}
 
 	@Override
-	public void doAction() {
+	public void doActionBehaviour() {
 		// empty on purpose
 	}
 
 	@Override
-	public void onExit() {
+	public void onExitBehaviour() {
 		toneDialer.stopDialTone();
 	}
 
