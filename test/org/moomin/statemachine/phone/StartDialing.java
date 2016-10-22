@@ -28,11 +28,6 @@ public class StartDialing extends SimpleState {
 		return false;
 	}
 
-	@Override
-	public boolean isComposite() {
-		return false;
-	}
-
 	public boolean isDialToneOn() {
 		return toneDialer.isDialToneOn();
 	}

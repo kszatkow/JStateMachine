@@ -9,11 +9,6 @@ public abstract class SimpleCompositeState extends State implements Region {
 		return false;
 	}
 	
-	@Override
-	public boolean isComposite() {
-		return true;
-	}
-
 	/* (non-Javadoc)
 	 * @see org.moomin.statemachine.Region#reset()
 	 */
@@ -84,5 +79,13 @@ public abstract class SimpleCompositeState extends State implements Region {
 	@Override
 	public void dispatchInternalEvent(Event event) {
 		ownedRegion.dispatchInternalEvent(event);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.moomin.statemachine.Region#tryConsumingEvent(org.moomin.statemachine.Event)
+	 */
+	@Override
+	public boolean tryConsumingEvent(Event event) {
+		return ownedRegion.tryConsumingEvent(event);
 	}
 }

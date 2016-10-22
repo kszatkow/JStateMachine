@@ -7,9 +7,4 @@ public class NoBehaviourEventConsumingState extends NoBehaviourState {
 		return false;
 	}
 
-	@Override
-	public boolean isComposite() {
-		return false;
-	}
-	
 }

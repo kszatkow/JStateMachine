@@ -76,22 +76,9 @@ public class PrimitiveStateMachine implements Region {
 		while (!eventQueue.isEmpty()) {
 			Event event = eventQueue.poll();
 			
-			if (activeState.isComposite()) {
-				SimpleCompositeState activeCompositeState = (SimpleCompositeState) activeState;
-				activeCompositeState.dispatchEvent(event);
-				activeCompositeState.processEvent();
-			}
-			// TODO - shouldn't it go back to while at this point? Test to be written to check
-			
-			List<Transition> outgoingFromActiveState = transitions.get(activeState);
-			for (Transition transition : outgoingFromActiveState) {
-				if( isTransitionEnabled(event, transition) ) {
-					fireTransition(transition);
-					if (activeState.isPassThrough()) {
-						dispatchInternalEvent(event);
-					}
-					break ;
-				}
+			// event can be consumed by the active state or has to be handled by the state machine itself
+			if (!activeState.tryConsumingEvent(event)) {
+				tryConsumingEvent(event);
 			}
 		}
 	}
@@ -143,5 +130,20 @@ public class PrimitiveStateMachine implements Region {
 	@Override
 	public void dispatchEvent(Event event) {
 		eventQueue.addLast(event);
+	}
+
+	@Override
+	public boolean tryConsumingEvent(Event event) {
+		List<Transition> outgoingFromActiveState = transitions.get(activeState);
+		for (Transition transition : outgoingFromActiveState) {
+			if( isTransitionEnabled(event, transition) ) {
+				fireTransition(transition);
+				if (activeState.isPassThrough()) {
+					dispatchInternalEvent(event);
+				}
+				return true;
+			}
+		}
+		return false;
 	}
 }

@@ -43,8 +43,4 @@ public class IdleStateWithOnEntryAndOnExitBehaviours extends SimpleState {
 		return true;
 	}
 
-	@Override
-	public boolean isComposite() {
-		return false;
-	}
 }

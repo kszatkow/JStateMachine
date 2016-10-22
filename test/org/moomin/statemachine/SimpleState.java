@@ -8,14 +8,18 @@ public abstract class SimpleState extends State {
 	}
 
 	@Override
-	public boolean isComposite() {
+	public final boolean tryConsumingEvent(Event event) {
 		return false;
+	}
+	
+	@Override
+	public final void activate() {
+		// empty on purpose
 	}
 
 	@Override
-	public final void activate() {}
-
-	@Override
-	public final void deactivate() {}
+	public final void deactivate() {
+		// empty on purpose
+	}
 
 }

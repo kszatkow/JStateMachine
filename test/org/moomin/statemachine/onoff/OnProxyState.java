@@ -29,9 +29,4 @@ public class OnProxyState extends SimpleState {
 		return false;
 	}
 
-	@Override
-	public boolean isComposite() {
-		return false;
-	}
-
 }

@@ -15,18 +15,23 @@ public abstract class State {
 		public boolean isPassThrough() {
 			return true;
 		}
-		
-		@Override
-		public boolean isComposite() {
-			return false;
-		}
 	};
 	
 	
 	public abstract boolean isPassThrough();
 	
-	public abstract boolean isComposite();
+	public abstract boolean tryConsumingEvent(Event event);
+	
+	public abstract void activate();
 
+	public abstract void deactivate();
+	
+	protected abstract void onEntryBehaviour();
+	
+	protected abstract void doActionBehaviour();
+	
+	protected abstract void onExitBehaviour();
+	
 	
 	public final void onEntry() {
 		activate();
@@ -42,16 +47,5 @@ public abstract class State {
 		onExitBehaviour();
 		deactivate();
 	}
-
-
-	public abstract void activate();
-
-	public abstract void deactivate();
-	
-	protected abstract void onEntryBehaviour();
-	
-	protected abstract void doActionBehaviour();
-	
-	protected abstract void onExitBehaviour();
 
 }

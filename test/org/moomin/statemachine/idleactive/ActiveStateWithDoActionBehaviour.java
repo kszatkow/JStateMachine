@@ -33,9 +33,4 @@ public class ActiveStateWithDoActionBehaviour extends SimpleState {
 		return true;
 	}
 
-	@Override
-	public boolean isComposite() {
-		return false;
-	}
-
 }

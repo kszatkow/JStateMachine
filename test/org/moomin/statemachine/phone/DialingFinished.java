@@ -30,9 +30,4 @@ public class DialingFinished extends SimpleState {
 		return false;
 	}
 
-	@Override
-	public boolean isComposite() {
-		return false;
-	}
-
 }
