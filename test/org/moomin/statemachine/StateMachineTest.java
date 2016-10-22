@@ -27,8 +27,10 @@ import org.moomin.statemachine.oddeven.ZeroNumberEvent;
 import org.moomin.statemachine.oddeven.ZeroNumberGuard;
 import org.moomin.statemachine.oddeven.ZeroState;
 import org.moomin.statemachine.onoff.OffEvent;
+import org.moomin.statemachine.onoff.OffProxyState;
 import org.moomin.statemachine.onoff.OffState;
 import org.moomin.statemachine.onoff.OnEvent;
+import org.moomin.statemachine.onoff.OnProxyState;
 import org.moomin.statemachine.onoff.OnState;
 import org.moomin.statemachine.onoff.Switch;
 import org.moomin.statemachine.onoff.TurnOffEffect;
@@ -92,6 +94,31 @@ public class StateMachineTest {
 		dispatchThenProcessEventAndCheckActiveState(new UnhandledEvent() , offState);
 		// off -> on
 		dispatchThenProcessEventAndCheckActiveState(new OnEvent() , onState);
+	}
+
+	@Test
+	public void completionTransitionFromASimpleStateTest() {
+		State offState = addState(new OffState("Off"));
+		State onProxyState = addState(new OnProxyState("OnProxy"));
+		State onState = addState(new OnState("On"));
+		State offProxyState = addState(new OffProxyState("OnProxy"));
+		
+		addTransition(offState, onProxyState, OnEvent.class);
+		addCompletionTransition(onProxyState, onState);
+		addTransition(onState, offProxyState, OffEvent.class);
+		addCompletionTransition(offProxyState, offState);
+				
+		setInitialTransitionAndActivate(offState);
+	
+		// off -> on
+		dispatchThenProcessEventAndCheckActiveState(new OnEvent() , onState);
+		// on -> off
+		dispatchThenProcessEventAndCheckActiveState(new OffEvent() , offState);
+	}
+	
+	private void addCompletionTransition(State source, State target) {
+		stateMachine.addTransition(
+				new CompletionTransition(source, target));
 	}
 
 	@Test
