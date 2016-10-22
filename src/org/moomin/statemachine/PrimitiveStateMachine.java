@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class PrimitiveStateMachine {
+public class PrimitiveStateMachine implements Region {
 
 	private boolean isActive = false;
 	private InitialTransition initialTransition;
@@ -21,6 +21,7 @@ public class PrimitiveStateMachine {
 		super();
 	}
 
+	@Override
 	public void addState(State state) {
 		throwIfInIllegalActiveState("State addition is not allowed when state machine is active.");
 		
@@ -30,6 +31,7 @@ public class PrimitiveStateMachine {
 		
 		states.add(state);
 		initializeTransitionsFromState(state);
+		state.owningRegion = this;
 	}
 
 	private void initializeTransitionsFromState(State state) {
@@ -37,6 +39,7 @@ public class PrimitiveStateMachine {
 		transitions.put(state, transitionsFromSource);
 	}
 
+	@Override
 	public void addTransition(Transition transition) {
 		throwIfInIllegalActiveState("Transition addition is not allowed when state machine is active.");
 		
@@ -48,6 +51,7 @@ public class PrimitiveStateMachine {
 		transitionsFromSource.add(transition);
 	}
 
+	@Override
 	public void setInitialTransition(InitialTransition initialTransition) {
 		throwIfInIllegalActiveState("Initial transition setup is not allowed when state machine is active.");
 		
@@ -58,12 +62,14 @@ public class PrimitiveStateMachine {
 		this.initialTransition = initialTransition; 
 	}
 
+	@Override
 	public State getActiveState() {
 		throwIfInIllegalInactiveState("State machine is inactive - no state is active at this stage, activate first.");
 		
 		return activeState;
 	}
 
+	@Override
 	public void processEvent() {
 		throwIfInIllegalInactiveState("Even processing not allowed when state machine is inactive, activate first.");
 		
@@ -82,7 +88,7 @@ public class PrimitiveStateMachine {
 				if( isTransitionEnabled(event, transition) ) {
 					fireTransition(transition);
 					if (activeState.isPassThrough()) {
-						dispatchEventToQueueFront(event);
+						dispatchInternalEvent(event);
 					}
 					break ;
 				}
@@ -90,7 +96,8 @@ public class PrimitiveStateMachine {
 		}
 	}
 
-	private void dispatchEventToQueueFront(Event event) {
+	@Override
+	public void dispatchInternalEvent(Event event) {
 		eventQueue.addFirst(event);
 	}
 
@@ -104,7 +111,7 @@ public class PrimitiveStateMachine {
 		if (activeState.isComposite()) {
 			SimpleCompositeState activeCompositeState = (SimpleCompositeState) activeState;
 			// TODO - can't it be handled by onExit?
-			activeCompositeState.reset();
+			activeCompositeState.deactivate();
 		}
 		transition.takeEffect();
 		activeState = transition.target();
@@ -116,6 +123,7 @@ public class PrimitiveStateMachine {
 		}
 	}
 
+	@Override
 	public void activate() {
 		throwIfInIllegalActiveState("State machine is already active.");
 		
@@ -135,11 +143,13 @@ public class PrimitiveStateMachine {
 		}
 	}
 	
-	protected void deactivate() {
+	@Override
+	public void deactivate() {
 		isActive = false;
 		activeState = State.NULL_STATE;
 	}
 
+	@Override
 	public void dispatchEvent(Event event) {
 		eventQueue.addLast(event);
 	}

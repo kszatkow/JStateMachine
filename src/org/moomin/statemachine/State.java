@@ -2,6 +2,11 @@ package org.moomin.statemachine;
 
 public abstract class State {
 
+	/*
+	 * TODO think how to fix it - dummy solution for now
+	 */
+	protected Region owningRegion;
+	
 	/* 
 	 * Null object design pattern.
 	 */
@@ -29,6 +34,7 @@ public abstract class State {
 	
 	public final void doAction() {
 		doActionBehaviour();
+		owningRegion.dispatchEvent(new CompletionEvent());
 	}
 	
 	public final void onExit() {

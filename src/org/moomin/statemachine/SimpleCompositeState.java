@@ -1,8 +1,8 @@
 package org.moomin.statemachine;
 
-public abstract class SimpleCompositeState /*extends PrimitiveStateMachine*/ extends State implements Region {
+public abstract class SimpleCompositeState extends State implements Region {
 
-	PrimitiveStateMachine itsRegion = new PrimitiveStateMachine();
+	private PrimitiveStateMachine ownedRegion = new PrimitiveStateMachine();
 	
 	@Override
 	public final boolean isPassThrough() {
@@ -18,9 +18,8 @@ public abstract class SimpleCompositeState /*extends PrimitiveStateMachine*/ ext
 	 * @see org.moomin.statemachine.Region#reset()
 	 */
 	@Override
-	public void reset() {
-//		deactivate();
-		itsRegion.deactivate();
+	public void deactivate() {
+		ownedRegion.deactivate();
 	}
 
 	/* (non-Javadoc)
@@ -28,7 +27,7 @@ public abstract class SimpleCompositeState /*extends PrimitiveStateMachine*/ ext
 	 */
 	@Override
 	public void activate() {
-		itsRegion.activate();
+		ownedRegion.activate();
 	}
 
 	/* (non-Javadoc)
@@ -36,7 +35,7 @@ public abstract class SimpleCompositeState /*extends PrimitiveStateMachine*/ ext
 	 */
 	@Override
 	public void dispatchEvent(Event event) {
-		itsRegion.dispatchEvent(event);
+		ownedRegion.dispatchEvent(event);
 	}
 
 	/* (non-Javadoc)
@@ -44,7 +43,7 @@ public abstract class SimpleCompositeState /*extends PrimitiveStateMachine*/ ext
 	 */
 	@Override
 	public void processEvent() {
-		itsRegion.processEvent();
+		ownedRegion.processEvent();
 	}
 
 	/* (non-Javadoc)
@@ -52,7 +51,7 @@ public abstract class SimpleCompositeState /*extends PrimitiveStateMachine*/ ext
 	 */
 	@Override
 	public void setInitialTransition(InitialTransition initialTransition) {
-		itsRegion.setInitialTransition(initialTransition);
+		ownedRegion.setInitialTransition(initialTransition);
 	}
 
 	/* (non-Javadoc)
@@ -60,7 +59,7 @@ public abstract class SimpleCompositeState /*extends PrimitiveStateMachine*/ ext
 	 */
 	@Override
 	public void addTransition(Transition transition) {
-		itsRegion.addTransition(transition);
+		ownedRegion.addTransition(transition);
 	}
 
 	/* (non-Javadoc)
@@ -68,7 +67,7 @@ public abstract class SimpleCompositeState /*extends PrimitiveStateMachine*/ ext
 	 */
 	@Override
 	public State getActiveState() {
-		return itsRegion.getActiveState();
+		return ownedRegion.getActiveState();
 	}
 
 	/* (non-Javadoc)
@@ -76,6 +75,14 @@ public abstract class SimpleCompositeState /*extends PrimitiveStateMachine*/ ext
 	 */
 	@Override
 	public void addState(State substate) {
-		itsRegion.addState(substate);
+		ownedRegion.addState(substate);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.moomin.statemachine.Region#dispatchInternalEvent(org.moomin.statemachine.Event)
+	 */
+	@Override
+	public void dispatchInternalEvent(Event event) {
+		ownedRegion.dispatchInternalEvent(event);
 	}
 }
