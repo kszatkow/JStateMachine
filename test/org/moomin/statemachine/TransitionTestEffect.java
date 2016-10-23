@@ -1,6 +1,6 @@
 package org.moomin.statemachine;
 
-public class InitialTransitionTestEffect implements TransitionEffect {
+public class TransitionTestEffect implements TransitionEffect {
 
 	private boolean executed = false;
 	

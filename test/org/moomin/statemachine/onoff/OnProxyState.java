@@ -1,32 +1,9 @@
 package org.moomin.statemachine.onoff;
 
-import org.moomin.statemachine.SimpleState;
+import org.moomin.statemachine.NoBehaviourEventConsumingState;
 
-public class OnProxyState extends SimpleState {
+public class OnProxyState extends NoBehaviourEventConsumingState {
 
 	public OnProxyState(String string) {}
-
-	@Override
-	public void onEntryBehaviour() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void doActionBehaviour() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onExitBehaviour() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public boolean isPassThrough() {
-		return false;
-	}
 
 }

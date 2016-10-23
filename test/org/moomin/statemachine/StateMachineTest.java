@@ -30,6 +30,7 @@ import org.moomin.statemachine.onoff.OffEvent;
 import org.moomin.statemachine.onoff.OffProxyState;
 import org.moomin.statemachine.onoff.OffState;
 import org.moomin.statemachine.onoff.OnEvent;
+import org.moomin.statemachine.onoff.OnOffTransitionGuard;
 import org.moomin.statemachine.onoff.OnProxyState;
 import org.moomin.statemachine.onoff.OnState;
 import org.moomin.statemachine.onoff.Switch;
@@ -51,11 +52,11 @@ import org.moomin.statemachine.phone.StartDialing;
 
 /**
  *  TODO:
- *  - cover all the ctors of CompletionTransition
  *  - thorough testing of SimpleCompositeState, e.g. completion transition
  *  - add proper handling of owning state machines and owning regions
  *  - extract proper interfaces and abstract classes - decide on responsibility split
  *     between Region, State and StateMachine
+ *  - resolve other TODOs
  */
 
 public class StateMachineTest {
@@ -74,7 +75,7 @@ public class StateMachineTest {
 	public void initialPseudostateTest() {
 		State normalState = addState(State.NULL_STATE);
 		
-		InitialTransitionTestEffect initialTransitionTestEffect = new InitialTransitionTestEffect();
+		TransitionTestEffect initialTransitionTestEffect = new TransitionTestEffect();
 		setInitialTransition(normalState, initialTransitionTestEffect);
 		
 		assertFalse(initialTransitionTestEffect.hasBeenExecuted());
@@ -109,7 +110,7 @@ public class StateMachineTest {
 	}
 
 	@Test
-	public void completionTransitionFromASimpleStateTest() {
+	public void simpleStateCompletionTransitionWithoutGuardTest() {
 		State offState = addState(new OffState("Off"));
 		State onProxyState = addState(new OnProxyState("OnProxy"));
 		State onState = addState(new OnState("On"));
@@ -118,14 +119,49 @@ public class StateMachineTest {
 		addTransition(offState, onProxyState, OnEvent.class);
 		addCompletionTransition(onProxyState, onState);
 		addTransition(onState, offProxyState, OffEvent.class);
-		addCompletionTransition(offProxyState, offState);
+		TransitionTestEffect effect = new TransitionTestEffect();
+		addCompletionTransition(offProxyState, offState, effect);
 				
 		setInitialTransitionAndActivate(offState);
 	
 		// off -> on
 		dispatchThenProcessEventAndCheckActiveState(new OnEvent() , onState);
 		// on -> off
+		assertFalse(effect.hasBeenExecuted());
 		dispatchThenProcessEventAndCheckActiveState(new OffEvent() , offState);
+		assertTrue(effect.hasBeenExecuted());
+	}
+	
+	@Test
+	public void simpleStateCompletionTransitionWithGuardTest() {
+		State offState = addState(new OffState("Off"));
+		State onProxyState = addState(new OnProxyState("OnProxy"));
+		State onState = addState(new OnState("On"));
+		State offProxyState = addState(new OffProxyState("OnProxy"));
+		
+		OnOffTransitionGuard guard =  new OnOffTransitionGuard();
+		addTransition(offState, onProxyState, OnEvent.class);
+		addCompletionTransition(onProxyState, onState, guard);
+		addTransition(onState, offProxyState, OffEvent.class);
+		TransitionTestEffect effect = new TransitionTestEffect();
+		addCompletionTransition(offProxyState, offState, guard, effect);
+				
+		setInitialTransitionAndActivate(offState);
+	
+		// off -> on unsuccessful - guard evaluates to false
+		dispatchThenProcessEventAndCheckActiveState(new OnEvent() , onProxyState);
+		// off -> on
+		guard.evaluateToTrue();
+		dispatchThenProcessEventAndCheckActiveState(new CompletionEvent() , onState);
+				
+		// on -> off unsuccessful - guard evaluates to false
+		guard.evaluateToFalse();
+		dispatchThenProcessEventAndCheckActiveState(new OffEvent() , offProxyState);
+		assertFalse(effect.hasBeenExecuted());
+		// on -> off
+		guard.evaluateToTrue();
+		dispatchThenProcessEventAndCheckActiveState(new CompletionEvent() , offState);
+		assertTrue(effect.hasBeenExecuted());
 	}
 	
 	private void addCompletionTransition(State source, State target) {
@@ -133,6 +169,23 @@ public class StateMachineTest {
 				new CompletionTransition(source, target));
 	}
 
+	private void addCompletionTransition(State source, State target, TransitionGuard guard) {
+		stateMachineRegion.addTransition(
+				new CompletionTransition(source, target, guard));
+		
+	}
+	
+	private void addCompletionTransition(State source, State target, TransitionEffect effect) {
+		stateMachineRegion.addTransition(
+				new CompletionTransition(source, target, effect));
+		
+	}
+	
+	private void addCompletionTransition(State source, State target, TransitionGuard guard, TransitionEffect effect) {
+		stateMachineRegion.addTransition(
+				new CompletionTransition(source, target, guard, effect));
+	}
+	
 	@Test
 	public void proxyStateTest() {
 		State offState = addState(new OffState("Off"));
@@ -578,7 +631,7 @@ public class StateMachineTest {
 		State partialDialSubstate = addSubstate(dialingState, new PartialDial("PartialDial"));
 		State dialingFinishedSubstate = addSubstate(dialingState, new DialingFinished("DialingFinished"));
 		
-		dialingState.setInitialTransition(new InitialTransition(startDialingSubstate, new InitialTransitionTestEffect()));
+		dialingState.setInitialTransition(new InitialTransition(startDialingSubstate, new TransitionTestEffect()));
 		dialingState.addTransition(new Transition(startDialingSubstate, partialDialSubstate, DigitEvent.class));
 		dialingState.addTransition(new Transition(partialDialSubstate, partialDialSubstate, DigitEvent.class));
 		dialingState.addTransition(new Transition(partialDialSubstate, dialingFinishedSubstate, FinishDialingEvent.class));
