@@ -1,6 +1,5 @@
 package org.moomin.statemachine;
 
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -10,15 +9,15 @@ import java.util.Set;
 
 public class PrimitiveStateMachine implements Region {
 
+	private StateMachine owningStateMachine;
 	private boolean isActive = false;
 	private InitialTransition initialTransition;
 	private Set<State> states = new HashSet<State>();
 	private Map<State, List<Transition>> transitions = new HashMap<>();
 	private State activeState = State.NULL_STATE;
-	private Deque<Event> eventQueue = new LinkedList<>();;
 
-	public PrimitiveStateMachine() {
-		super();
+	public PrimitiveStateMachine(StateMachine owningStateMachine) {
+		this.owningStateMachine = owningStateMachine;
 	}
 
 	@Override
@@ -69,22 +68,9 @@ public class PrimitiveStateMachine implements Region {
 		return activeState;
 	}
 
-	public void processEvent() {
-		throwIfInIllegalInactiveState("Even processing not allowed when state machine is inactive, activate first.");
-		
-		while (!eventQueue.isEmpty()) {
-			Event event = eventQueue.poll();
-			
-			// event can be consumed by the active state or has to be handled by the state machine itself
-			if (!activeState.tryConsumingEvent(event)) {
-				tryConsumingEvent(event);
-			}
-		}
-	}
-
 	@Override
 	public void dispatchInternalEvent(Event event) {
-		eventQueue.addFirst(event);
+		owningStateMachine.dispatchEventToQueueFront(event);
 	}
 
 	private boolean isTransitionEnabled(Event event, Transition transition) {
@@ -126,12 +112,12 @@ public class PrimitiveStateMachine implements Region {
 		activeState = State.NULL_STATE;
 	}
 
-	public void dispatchEvent(Event event) {
-		eventQueue.addLast(event);
-	}
-
 	@Override
 	public boolean tryConsumingEvent(Event event) {
+		if (activeState.tryConsumingEvent(event)) {
+			return true;
+		}
+		
 		List<Transition> outgoingFromActiveState = transitions.get(activeState);
 		for (Transition transition : outgoingFromActiveState) {
 			if( isTransitionEnabled(event, transition) ) {
@@ -143,5 +129,10 @@ public class PrimitiveStateMachine implements Region {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public boolean isActive() {
+		return isActive;
 	}
 }

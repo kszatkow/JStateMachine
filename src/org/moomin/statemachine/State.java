@@ -17,7 +17,7 @@ public abstract class State {
 		}
 	};
 	
-	
+	//TODO - eliminate isPassThrough method - it shouldn't be necessary
 	public abstract boolean isPassThrough();
 	
 	public abstract boolean tryConsumingEvent(Event event);

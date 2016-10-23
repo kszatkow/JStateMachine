@@ -17,5 +17,7 @@ public interface Region {
 	void addState(State substate);
 	
 	boolean tryConsumingEvent(Event event);
+	
+	boolean isActive();
 
 }

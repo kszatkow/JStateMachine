@@ -1,8 +1,12 @@
 package org.moomin.statemachine;
 
-public abstract class SimpleCompositeState extends State implements Region {
+public abstract class SimpleCompositeState extends State {
 
-	private PrimitiveStateMachine ownedRegion = new PrimitiveStateMachine();
+	private PrimitiveStateMachine ownedRegion;
+	
+	public SimpleCompositeState(StateMachine owningStateMachine) {
+		ownedRegion = new PrimitiveStateMachine(owningStateMachine);
+	}
 	
 	@Override
 	public final boolean isPassThrough() {
@@ -28,7 +32,6 @@ public abstract class SimpleCompositeState extends State implements Region {
 	/* (non-Javadoc)
 	 * @see org.moomin.statemachine.Region#setInitialTransition(org.moomin.statemachine.InitialTransition)
 	 */
-	@Override
 	public void setInitialTransition(InitialTransition initialTransition) {
 		ownedRegion.setInitialTransition(initialTransition);
 	}
@@ -36,7 +39,6 @@ public abstract class SimpleCompositeState extends State implements Region {
 	/* (non-Javadoc)
 	 * @see org.moomin.statemachine.Region#addTransition(org.moomin.statemachine.Transition)
 	 */
-	@Override
 	public void addTransition(Transition transition) {
 		ownedRegion.addTransition(transition);
 	}
@@ -44,7 +46,6 @@ public abstract class SimpleCompositeState extends State implements Region {
 	/* (non-Javadoc)
 	 * @see org.moomin.statemachine.Region#getActiveState()
 	 */
-	@Override
 	public State getActiveState() {
 		return ownedRegion.getActiveState();
 	}
@@ -52,7 +53,6 @@ public abstract class SimpleCompositeState extends State implements Region {
 	/* (non-Javadoc)
 	 * @see org.moomin.statemachine.Region#addState(org.moomin.statemachine.State)
 	 */
-	@Override
 	public void addState(State substate) {
 		ownedRegion.addState(substate);
 	}
@@ -60,9 +60,8 @@ public abstract class SimpleCompositeState extends State implements Region {
 	/* (non-Javadoc)
 	 * @see org.moomin.statemachine.Region#dispatchInternalEvent(org.moomin.statemachine.Event)
 	 */
-	@Override
 	public void dispatchInternalEvent(Event event) {
-		ownedRegion.dispatchInternalEvent(event);
+		owningRegion.dispatchInternalEvent(event);
 	}
 	
 	/* (non-Javadoc)
@@ -71,5 +70,12 @@ public abstract class SimpleCompositeState extends State implements Region {
 	@Override
 	public boolean tryConsumingEvent(Event event) {
 		return ownedRegion.tryConsumingEvent(event);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.moomin.statemachine.Region#isActive()
+	 */
+	public boolean isActive() {
+		return ownedRegion.isActive();
 	}
 }

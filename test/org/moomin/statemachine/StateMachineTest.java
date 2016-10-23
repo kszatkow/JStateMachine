@@ -49,13 +49,25 @@ import org.moomin.statemachine.phone.PartialDial;
 import org.moomin.statemachine.phone.PhoneIdleState;
 import org.moomin.statemachine.phone.StartDialing;
 
+/**
+ *  TODO:
+ *  - cover all the ctors of CompletionTransition
+ *  - thorough testing of SimpleCompositeState, e.g. completion transition
+ *  - add proper handling of owning state machines and owning regions
+ *  - extract proper interfaces and abstract classes - decide on responsibility split
+ *     between Region, State and StateMachine
+ */
+
 public class StateMachineTest {
 
 	private StateMachine stateMachine;
+	private Region stateMachineRegion;
 
 	@Before
 	public void setUp() throws Exception {
 		stateMachine = new StateMachine();
+		stateMachineRegion = new PrimitiveStateMachine(stateMachine);
+		stateMachine.addRegion(stateMachineRegion);
 	}
 	
 	@Test
@@ -68,7 +80,7 @@ public class StateMachineTest {
 		assertFalse(initialTransitionTestEffect.hasBeenExecuted());
 		
 		stateMachine.activate();
-		assertSame(normalState, stateMachine.getActiveState());
+		assertSame(normalState, stateMachineRegion.getActiveState());
 		assertTrue(initialTransitionTestEffect.hasBeenExecuted());
 	}
 
@@ -117,7 +129,7 @@ public class StateMachineTest {
 	}
 	
 	private void addCompletionTransition(State source, State target) {
-		stateMachine.addTransition(
+		stateMachineRegion.addTransition(
 				new CompletionTransition(source, target));
 	}
 
@@ -269,7 +281,7 @@ public class StateMachineTest {
 		
 		// no event dispatched - no transition
 		stateMachine.processEvent();
-		assertSame(idleState, stateMachine.getActiveState());
+		assertSame(idleState, stateMachineRegion.getActiveState());
 	}
 	
 	@Test
@@ -301,7 +313,7 @@ public class StateMachineTest {
 		ExceptionThrownIllegalTransitionChecker illegalTransitionChecker = new ExceptionThrownIllegalTransitionChecker(
 				IllegalArgumentException.class, 
 				"Exception should have been thrown - illegal transition added.",
-				stateMachine);
+				stateMachineRegion);
 		
 		// illegal transition - both states illegal
 		illegalTransitionChecker.setIllegalTransition(new Transition(offState, onState, OnEvent.class));
@@ -369,7 +381,7 @@ public class StateMachineTest {
 				"Exception should have been thrown - illegal initial transition setup.") {
 					@Override
 					protected void doAction() {
-						stateMachine.addState(State.NULL_STATE);
+						stateMachineRegion.addState(State.NULL_STATE);
 					}
 		};
 		
@@ -470,7 +482,7 @@ public class StateMachineTest {
 				"Exception should have been thrown - illegal active state read.") {
 					@Override
 					protected void doAction() {
-						stateMachine.getActiveState();
+						stateMachineRegion.getActiveState();
 					}
 		};
 		
@@ -552,7 +564,7 @@ public class StateMachineTest {
 	@Test
 	public void simpleCompositeStateTest() {
 		State phoneIdleState = addState(new PhoneIdleState("PhoneIdle"));
-		SimpleCompositeState dialingState = addSimpleCompositeState(new DialingState("Dialing"));
+		SimpleCompositeState dialingState = addSimpleCompositeState(new DialingState(stateMachine, "Dialing"));
 		State invalidState = addState(new InvalidNumberState("InvalidNumber"));
 		State connectingState = addState(new ConnectingState("Connecting"));
 		
@@ -627,7 +639,7 @@ public class StateMachineTest {
 	
 
 	private State addState(State state) {
-		stateMachine.addState(state);
+		stateMachineRegion.addState(state);
 		return state;
 	}
 	
@@ -636,31 +648,31 @@ public class StateMachineTest {
 	}
 	
 	private void addTransition(State source, State target, Class<? extends Event> triggerableBy) {
-		stateMachine.addTransition(
+		stateMachineRegion.addTransition(
 				new Transition(source, target, triggerableBy));
 	}
 
 	private void addTransition(State source, State target, Collection<Class<? extends Event>> triggerableBy) {
-		stateMachine.addTransition(
+		stateMachineRegion.addTransition(
 				new Transition(source, target, triggerableBy));
 	}
 	
 	private void addTransition(State source, State target, Class<? extends Event> triggerableBy, TransitionEffect effect) {
-		stateMachine.addTransition(
+		stateMachineRegion.addTransition(
 				new Transition(source, target, triggerableBy, effect));
 	}
 
 	private void addTransition(State source, State target, Collection<Class<? extends Event>> triggerableBy, TransitionEffect effect) {
-		stateMachine.addTransition(
+		stateMachineRegion.addTransition(
 				new Transition(source, target, triggerableBy, effect));
 	}
 	
 	private void addTransition(State source, State target, Class<? extends Event> triggerableBy, TransitionGuard guard) {
-		stateMachine.addTransition(new Transition(source, target, triggerableBy, guard));
+		stateMachineRegion.addTransition(new Transition(source, target, triggerableBy, guard));
 	}
 	
 	private void addTransition(State source, State target, Set<Class<? extends Event>> triggerableBy, TransitionGuard guard) {
-		stateMachine.addTransition(new Transition(source, target, triggerableBy, guard));
+		stateMachineRegion.addTransition(new Transition(source, target, triggerableBy, guard));
 	}
 	
 	private void setInitialTransitionAndActivate(State initialState) {
@@ -676,12 +688,12 @@ public class StateMachineTest {
 	}
 	
 	private void setInitialTransition(State target, TransitionEffect effect) {
-		stateMachine.setInitialTransition(new InitialTransition(target, effect));
+		stateMachineRegion.setInitialTransition(new InitialTransition(target, effect));
 	}
 	
 	private void dispatchThenProcessEventAndCheckActiveState(Event event, State expectedState) {
 		stateMachine.dispatchEvent(event);
 		stateMachine.processEvent();
-		assertSame(expectedState, stateMachine.getActiveState());
+		assertSame(expectedState, stateMachineRegion.getActiveState());
 	}
 }
