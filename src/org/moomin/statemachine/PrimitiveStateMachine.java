@@ -69,7 +69,6 @@ public class PrimitiveStateMachine implements Region {
 		return activeState;
 	}
 
-	@Override
 	public void processEvent() {
 		throwIfInIllegalInactiveState("Even processing not allowed when state machine is inactive, activate first.");
 		
@@ -127,7 +126,6 @@ public class PrimitiveStateMachine implements Region {
 		activeState = State.NULL_STATE;
 	}
 
-	@Override
 	public void dispatchEvent(Event event) {
 		eventQueue.addLast(event);
 	}

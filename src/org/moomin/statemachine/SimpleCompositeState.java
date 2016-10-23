@@ -26,22 +26,6 @@ public abstract class SimpleCompositeState extends State implements Region {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.moomin.statemachine.Region#dispatchEvent(org.moomin.statemachine.Event)
-	 */
-	@Override
-	public void dispatchEvent(Event event) {
-		ownedRegion.dispatchEvent(event);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.moomin.statemachine.Region#processEvent()
-	 */
-	@Override
-	public void processEvent() {
-		ownedRegion.processEvent();
-	}
-
-	/* (non-Javadoc)
 	 * @see org.moomin.statemachine.Region#setInitialTransition(org.moomin.statemachine.InitialTransition)
 	 */
 	@Override

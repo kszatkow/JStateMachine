@@ -40,7 +40,7 @@ public abstract class State {
 	
 	public final void doAction() {
 		doActionBehaviour();
-		owningRegion.dispatchEvent(new CompletionEvent());
+		owningRegion.dispatchInternalEvent(new CompletionEvent());
 	}
 	
 	public final void onExit() {

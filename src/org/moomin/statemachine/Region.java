@@ -6,11 +6,7 @@ public interface Region {
 
 	void activate();
 
-	void dispatchEvent(Event event);
-	
 	void dispatchInternalEvent(Event event);
-
-	void processEvent();
 
 	void setInitialTransition(InitialTransition initialTransition);
 
