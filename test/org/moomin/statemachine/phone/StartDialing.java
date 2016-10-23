@@ -23,11 +23,6 @@ public class StartDialing extends SimpleState {
 		toneDialer.stopDialTone();
 	}
 
-	@Override
-	public boolean isPassThrough() {
-		return false;
-	}
-
 	public boolean isDialToneOn() {
 		return toneDialer.isDialToneOn();
 	}

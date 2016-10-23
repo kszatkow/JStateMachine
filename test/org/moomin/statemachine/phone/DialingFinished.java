@@ -24,10 +24,4 @@ public class DialingFinished extends SimpleState {
 
 	}
 
-	@Override
-	public boolean isPassThrough() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 }

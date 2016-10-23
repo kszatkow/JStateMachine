@@ -8,11 +8,6 @@ public abstract class SimpleCompositeState extends State {
 		ownedRegion = new PrimitiveStateMachine(owningStateMachine);
 	}
 	
-	@Override
-	public final boolean isPassThrough() {
-		return false;
-	}
-	
 	/* (non-Javadoc)
 	 * @see org.moomin.statemachine.Region#reset()
 	 */

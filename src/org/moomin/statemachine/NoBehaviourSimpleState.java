@@ -4,9 +4,9 @@ package org.moomin.statemachine;
  * Null object, designed for inheritance only. 
  * See State class for publicly available instance of this null object. 
  */
-public abstract class NoBehaviourState extends SimpleState {
+public abstract class NoBehaviourSimpleState extends SimpleState {
 
-	protected NoBehaviourState() {}
+	protected NoBehaviourSimpleState() {}
 	
 	@Override
 	public final void onEntryBehaviour() {

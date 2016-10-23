@@ -21,9 +21,4 @@ public class PartialDial extends SimpleState {
 		// empty on purpose
 	}
 
-	@Override
-	public boolean isPassThrough() {
-		return false;
-	}
-
 }

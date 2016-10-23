@@ -1,8 +1,8 @@
 package org.moomin.statemachine.phone;
 
-import org.moomin.statemachine.NoBehaviourEventConsumingState;
+import org.moomin.statemachine.NoBehaviourSimpleState;
 
-public class ConnectingState extends NoBehaviourEventConsumingState {
+public class ConnectingState extends NoBehaviourSimpleState {
 
 	public ConnectingState(String string) {}
 

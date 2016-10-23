@@ -38,9 +38,4 @@ public class IdleStateWithOnEntryAndOnExitBehaviours extends SimpleState {
 		onExitDone = false;
 	}
 
-	@Override
-	public boolean isPassThrough() {
-		return true;
-	}
-
 }

@@ -24,9 +24,4 @@ public class OffProxyState extends SimpleState {
 
 	}
 
-	@Override
-	public boolean isPassThrough() {
-		return false;
-	}
-
 }

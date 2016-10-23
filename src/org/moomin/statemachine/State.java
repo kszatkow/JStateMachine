@@ -10,15 +10,8 @@ public abstract class State {
 	/* 
 	 * Null object design pattern.
 	 */
-	public static final State NULL_STATE = new NoBehaviourState() {
-		@Override
-		public boolean isPassThrough() {
-			return true;
-		}
-	};
+	public static final State NULL_STATE = new NoBehaviourSimpleState() {};
 	
-	//TODO - eliminate isPassThrough method - it shouldn't be necessary
-	public abstract boolean isPassThrough();
 	
 	public abstract boolean tryConsumingEvent(Event event);
 	

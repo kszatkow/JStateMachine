@@ -1,8 +1,8 @@
 package org.moomin.statemachine.oddeven;
 
-import org.moomin.statemachine.NoBehaviourEventConsumingState;
+import org.moomin.statemachine.NoBehaviourSimpleState;
 
-public class ZeroState extends NoBehaviourEventConsumingState {
+public class ZeroState extends NoBehaviourSimpleState {
 
 	public ZeroState(String string) { }
 

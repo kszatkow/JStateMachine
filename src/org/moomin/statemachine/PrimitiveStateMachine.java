@@ -122,9 +122,6 @@ public class PrimitiveStateMachine implements Region {
 		for (Transition transition : outgoingFromActiveState) {
 			if( isTransitionEnabled(event, transition) ) {
 				fireTransition(transition);
-				if (activeState.isPassThrough()) {
-					dispatchInternalEvent(event);
-				}
 				return true;
 			}
 		}

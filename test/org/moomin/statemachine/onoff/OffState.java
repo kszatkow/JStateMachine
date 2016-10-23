@@ -1,8 +1,8 @@
 package org.moomin.statemachine.onoff;
 
-import org.moomin.statemachine.NoBehaviourEventConsumingState;
+import org.moomin.statemachine.NoBehaviourSimpleState;
 
-public class OffState extends NoBehaviourEventConsumingState {
+public class OffState extends NoBehaviourSimpleState {
 
 	public OffState(String string) { }
 

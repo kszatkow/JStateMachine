@@ -164,47 +164,6 @@ public class StateMachineTest {
 		assertTrue(effect.hasBeenExecuted());
 	}
 	
-	private void addCompletionTransition(State source, State target) {
-		stateMachineRegion.addTransition(
-				new CompletionTransition(source, target));
-	}
-
-	private void addCompletionTransition(State source, State target, TransitionGuard guard) {
-		stateMachineRegion.addTransition(
-				new CompletionTransition(source, target, guard));
-		
-	}
-	
-	private void addCompletionTransition(State source, State target, TransitionEffect effect) {
-		stateMachineRegion.addTransition(
-				new CompletionTransition(source, target, effect));
-		
-	}
-	
-	private void addCompletionTransition(State source, State target, TransitionGuard guard, TransitionEffect effect) {
-		stateMachineRegion.addTransition(
-				new CompletionTransition(source, target, guard, effect));
-	}
-	
-	@Test
-	public void proxyStateTest() {
-		State offState = addState(new OffState("Off"));
-		State proxyState = addState(State.NULL_STATE);
-		State onState = addState(new OnState("On"));
-		
-		addTransition(offState, proxyState, OnEvent.class);
-		addTransition(proxyState, onState, OnEvent.class);
-		addTransition(onState, proxyState, OffEvent.class);
-		addTransition(proxyState, offState, OffEvent.class);
-				
-		setInitialTransitionAndActivate(offState);
-	
-		// off -> on
-		dispatchThenProcessEventAndCheckActiveState(new OnEvent() , onState);
-		// on -> off
-		dispatchThenProcessEventAndCheckActiveState(new OffEvent() , offState);
-	}
-	
 	@Test
 	public void transitionsWithGuardsTest() {
 		State oddState = addState(new OddState("Odd"));
@@ -374,7 +333,6 @@ public class StateMachineTest {
 		
 		// illegal transition - source state illegal
 		illegalTransitionChecker.setIllegalTransition(new Transition(offState, activeState, OnEvent.class));
-		illegalTransitionChecker.checkExceptionThrownAfterAction();
 		
 		// illegal transition - target state illegal
 		illegalTransitionChecker.setIllegalTransition(new Transition(idleState, onState, OffEvent.class));
@@ -577,11 +535,11 @@ public class StateMachineTest {
 	}
 	
 	@Test
-	public void choicePseudostateTest() {
+	public void junctionPseudostateTest() {
 		State zeroState = addState(new ZeroState("Zero"));
 		State oddState = addState(new OddState("Odd"));
 		State evenState = addState(new EvenState("Even"));
-		State checkParity = addState(new ChoiceState("CheckParity"));
+		State checkParity = addState(new JunctionState("CheckParity"));
 		
 		addTransition(zeroState, checkParity, FeedNumberEvent.class);
 		addTransition(oddState, checkParity, FeedNumberEvent.class);
@@ -593,25 +551,30 @@ public class StateMachineTest {
 		setInitialTransitionAndActivate(zeroState);
 	
 		// zero -> zero
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(0) , zeroState);
+		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(0), zeroState);
 		// zero -> odd
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(3) , oddState);
+		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(3) , oddState);
 		// odd -> odd
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(5) , oddState);
+		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(5) , oddState);
 		// odd -> zero
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(0) , zeroState);
+		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(0) , zeroState);
 		// zero -> even
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(2) , evenState);
+		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(2) , evenState);
 		// even -> even
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(12) , evenState);
+		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(12) , evenState);
 		// even -> zero
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(0) , zeroState);
+		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(0) , zeroState);
 		// zero -> odd
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(13) , oddState);
+		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(13) , oddState);
 		// odd -> even
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(18) , evenState);
+		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(18) , evenState);
 		// even -> odd
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(15) , oddState);
+		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(15) , oddState);
+	}
+
+	private void dispatchThenProcessTheSameEventTwiceAndCheckActiveState(Event event, State expectedActiveState) {
+		stateMachine.dispatchEvent(event);
+		dispatchThenProcessEventAndCheckActiveState(event, expectedActiveState);
 	}
 	
 	@Test
@@ -726,6 +689,28 @@ public class StateMachineTest {
 	
 	private void addTransition(State source, State target, Set<Class<? extends Event>> triggerableBy, TransitionGuard guard) {
 		stateMachineRegion.addTransition(new Transition(source, target, triggerableBy, guard));
+	}
+	
+	private void addCompletionTransition(State source, State target) {
+		stateMachineRegion.addTransition(
+				new CompletionTransition(source, target));
+	}
+
+	private void addCompletionTransition(State source, State target, TransitionGuard guard) {
+		stateMachineRegion.addTransition(
+				new CompletionTransition(source, target, guard));
+		
+	}
+	
+	private void addCompletionTransition(State source, State target, TransitionEffect effect) {
+		stateMachineRegion.addTransition(
+				new CompletionTransition(source, target, effect));
+		
+	}
+	
+	private void addCompletionTransition(State source, State target, TransitionGuard guard, TransitionEffect effect) {
+		stateMachineRegion.addTransition(
+				new CompletionTransition(source, target, guard, effect));
 	}
 	
 	private void setInitialTransitionAndActivate(State initialState) {

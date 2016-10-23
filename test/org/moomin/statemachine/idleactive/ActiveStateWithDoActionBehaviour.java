@@ -28,9 +28,4 @@ public class ActiveStateWithDoActionBehaviour extends SimpleState {
 		return onActionDone;
 	}
 
-	@Override
-	public boolean isPassThrough() {
-		return true;
-	}
-
 }
