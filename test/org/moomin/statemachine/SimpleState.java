@@ -17,4 +17,9 @@ public abstract class SimpleState extends State {
 		// empty on purpose
 	}
 
+	public void doAction() {
+		doActionBehaviour();
+		owningRegion.dispatchInternalEvent(new CompletionEvent(this));
+	}
+	
 }

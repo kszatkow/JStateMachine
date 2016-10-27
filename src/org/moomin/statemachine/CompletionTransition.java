@@ -18,4 +18,14 @@ public class CompletionTransition extends Transition {
 	public CompletionTransition(State source, State target) {
 		super(source, target, CompletionEvent.class);
 	}
+	
+	@Override
+	public boolean evaluateGuardFor(Event event) {
+		CompletionEvent completionEvent = (CompletionEvent) event;
+		if (source != completionEvent.getSource()) {
+			return false;
+		}
+		
+		return super.evaluateGuardFor(event);
+	}
 }

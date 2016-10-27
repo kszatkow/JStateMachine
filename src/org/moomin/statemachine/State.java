@@ -27,18 +27,16 @@ public abstract class State {
 	
 	
 	public final void onEntry() {
-		activate();
 		onEntryBehaviour();
+		activate();
 	}
 	
-	public final void doAction() {
-		doActionBehaviour();
-		owningRegion.dispatchInternalEvent(new CompletionEvent());
-	}
+	// TODO - how to solve it better
+	public abstract void doAction();
 	
 	public final void onExit() {
-		onExitBehaviour();
 		deactivate();
+		onExitBehaviour();
 	}
 
 }

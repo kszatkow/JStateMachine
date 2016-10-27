@@ -73,4 +73,9 @@ public abstract class SimpleCompositeState extends State {
 	public boolean isActive() {
 		return ownedRegion.isActive();
 	}
+	
+	@Override
+	public void doAction() {
+		doActionBehaviour();
+	}
 }

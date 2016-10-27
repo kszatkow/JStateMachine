@@ -7,7 +7,7 @@ import java.util.Set;
 
 public class Transition extends InitialTransition {
 
-	private State source;
+	protected State source;
 	
 	private Set<Class<? extends Event>> triggerableBy = new HashSet<>();
 	
