@@ -1,6 +1,6 @@
 package org.moomin.statemachine;
 
-public class InitialTransition {
+public class InitialTransition implements StateMachinePart {
 
 	protected State target;
 	
@@ -17,5 +17,10 @@ public class InitialTransition {
 	
 	public void takeEffect() {
 		effect.execute();
+	}
+	
+	public StateMachine containingStateMachine() {
+		// TODO - think if it can stay this way
+		return target.containingStateMachine();
 	}
 }

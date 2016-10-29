@@ -31,7 +31,7 @@ public class PrimitiveStateMachine implements Region {
 		
 		states.add(state);
 		initializeTransitionsFromState(state);
-		state.owningRegion = this;
+		state.assignOwner(this);
 	}
 
 	private void initializeTransitionsFromState(State state) {
@@ -144,6 +144,11 @@ public class PrimitiveStateMachine implements Region {
 	@Override
 	public boolean hasReachedFinalState() {
 		return activeState == finalState;
+	}
+
+	@Override
+	public StateMachine containingStateMachine() {
+		return owningStateMachine;
 	}
 
 }

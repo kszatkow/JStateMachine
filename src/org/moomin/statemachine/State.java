@@ -1,10 +1,7 @@
 package org.moomin.statemachine;
 
-public abstract class State {
+public abstract class State implements StateMachinePart {
 
-	/*
-	 * TODO think how to fix it - dummy solution for now
-	 */
 	protected Region owningRegion;
 	
 	/* 
@@ -39,4 +36,12 @@ public abstract class State {
 		onExitBehaviour();
 	}
 
+	public final StateMachine containingStateMachine() {
+		return owningRegion.containingStateMachine();
+	}
+	
+	final void assignOwner(Region owningRegion) {
+		this.owningRegion = owningRegion;
+	}
+	
 }

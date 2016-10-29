@@ -1,6 +1,6 @@
 package org.moomin.statemachine;
 
-public interface Region {
+public interface Region extends StateMachinePart {
 
 	void deactivate();
 

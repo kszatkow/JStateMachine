@@ -2,9 +2,11 @@ package org.moomin.statemachine;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Before;
@@ -726,6 +728,51 @@ public class StateMachineTest {
 		dispatchThenProcessEventAndCheckActiveState(new HangUpEvent() , phoneIdleState);
 	}	
 	
+	@Test
+	public void containingStateMachinenTest() {
+		State phoneIdleState = addState(new PhoneIdleState("PhoneIdle"));
+		SimpleCompositeState dialingState = addSimpleCompositeState(new DialingState(stateMachine, "Dialing"));
+		State connectingState = addState(new ConnectingState("Connecting"));
+		
+		Transition phoneIdleToDialingTransition = addTransition(phoneIdleState, dialingState, LiftReceiverEvent.class);
+		CompletionTransition dialingToConnectionTransition = addCompletionTransition(dialingState, connectingState);
+		Transition connectingToPhoneIdleTransition = addTransition(connectingState, phoneIdleState, HangUpEvent.class);
+		
+		StartDialing startDialingSubstate = (StartDialing) addSubstate(dialingState, new StartDialing("StartDialing"));
+		State partialDialSubstate = addSubstate(dialingState, new PartialDial("PartialDial"));
+		State dialingFinishedSubstate = addSubstate(dialingState, new DialingFinished("DialingFinished"));
+		dialingState.setFinalSubstate(dialingFinishedSubstate);
+		
+		InitialTransition initialDialingTransition = new InitialTransition(startDialingSubstate, new TransitionTestEffect());
+		dialingState.setInitialTransition(initialDialingTransition);
+		CompletionTransition startDialingToPartialDialTransition = new CompletionTransition(startDialingSubstate, partialDialSubstate);
+		dialingState.addTransition(startDialingToPartialDialTransition);
+		Transition partialDialInternalTransition = new Transition(partialDialSubstate, partialDialSubstate, DigitEvent.class);
+		dialingState.addTransition(partialDialInternalTransition);
+		Transition partialDialToDialingFinishedTransition = new Transition(partialDialSubstate, dialingFinishedSubstate, FinishDialingEvent.class);
+		dialingState.addTransition(partialDialToDialingFinishedTransition);
+		
+		List<StateMachinePart> stateMachineParts = new ArrayList<>();
+		stateMachineParts.add(phoneIdleState);
+		stateMachineParts.add(dialingState);
+		stateMachineParts.add(connectingState);
+		stateMachineParts.add(phoneIdleToDialingTransition);
+		stateMachineParts.add(dialingToConnectionTransition);
+		stateMachineParts.add(connectingToPhoneIdleTransition);
+		stateMachineParts.add(startDialingSubstate);
+		stateMachineParts.add(partialDialSubstate);
+		stateMachineParts.add(dialingFinishedSubstate);
+		stateMachineParts.add(initialDialingTransition);
+		stateMachineParts.add(startDialingToPartialDialTransition);
+		stateMachineParts.add(partialDialInternalTransition);
+		stateMachineParts.add(partialDialToDialingFinishedTransition);
+		stateMachineParts.add(stateMachineRegion);
+		
+		for(StateMachinePart part : stateMachineParts) {
+			assertSame(stateMachine, part.containingStateMachine());
+		}
+	}
+	
 	private State addSubstate(SimpleCompositeState compositeState, State substate) {
 		compositeState.addState(substate);
 		return substate;
@@ -741,9 +788,10 @@ public class StateMachineTest {
 		return (SimpleCompositeState) addState(state);
 	}
 	
-	private void addTransition(State source, State target, Class<? extends Event> triggerableBy) {
-		stateMachineRegion.addTransition(
-				new Transition(source, target, triggerableBy));
+	private Transition addTransition(State source, State target, Class<? extends Event> triggerableBy) {
+		Transition transition = new Transition(source, target, triggerableBy);
+		stateMachineRegion.addTransition(transition);
+		return transition;
 	}
 
 	private void addTransition(State source, State target, Collection<Class<? extends Event>> triggerableBy) {
@@ -769,9 +817,10 @@ public class StateMachineTest {
 		stateMachineRegion.addTransition(new Transition(source, target, triggerableBy, guard));
 	}
 	
-	private void addCompletionTransition(State source, State target) {
-		stateMachineRegion.addTransition(
-				new CompletionTransition(source, target));
+	private CompletionTransition addCompletionTransition(State source, State target) {
+		CompletionTransition completionTransition = new CompletionTransition(source, target);
+		stateMachineRegion.addTransition(completionTransition);
+		return completionTransition;
 	}
 
 	private void addCompletionTransition(State source, State target, TransitionGuard guard) {
