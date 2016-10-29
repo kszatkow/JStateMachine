@@ -15,6 +15,7 @@ public class PrimitiveStateMachine implements Region {
 	private Set<State> states = new HashSet<State>();
 	private Map<State, List<Transition>> transitions = new HashMap<>();
 	private State activeState = State.NULL_STATE;
+	private State finalState;
 
 	public PrimitiveStateMachine(StateMachine owningStateMachine) {
 		this.owningStateMachine = owningStateMachine;
@@ -78,6 +79,7 @@ public class PrimitiveStateMachine implements Region {
 				&& transition.evaluateGuardFor(event);
 	}
 
+	// TODO - why is this initial transition?
 	private void fireTransition(InitialTransition transition) {
 		activeState.onExit();
 		transition.takeEffect();
@@ -132,4 +134,16 @@ public class PrimitiveStateMachine implements Region {
 	public boolean isActive() {
 		return isActive;
 	}
+
+	@Override
+	public void setFinalState(State finalState) {
+		this.finalState = finalState;
+		
+	}
+
+	@Override
+	public boolean hasReachedFinalState() {
+		return activeState == finalState;
+	}
+
 }

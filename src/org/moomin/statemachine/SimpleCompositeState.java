@@ -64,18 +64,19 @@ public abstract class SimpleCompositeState extends State {
 	 */
 	@Override
 	public boolean tryConsumingEvent(Event event) {
-		return ownedRegion.tryConsumingEvent(event);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.moomin.statemachine.Region#isActive()
-	 */
-	public boolean isActive() {
-		return ownedRegion.isActive();
+		boolean eventConsumed = ownedRegion.tryConsumingEvent(event);
+		if (eventConsumed && ownedRegion.hasReachedFinalState()) {
+			dispatchInternalEvent(new CompletionEvent(this));
+		}
+		return eventConsumed;
 	}
 	
 	@Override
 	public void doAction() {
 		doActionBehaviour();
+	}
+	
+	public void setFinalSubstate(State finalState) {
+		ownedRegion.setFinalState(finalState);
 	}
 }

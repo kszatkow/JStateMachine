@@ -9,6 +9,8 @@ public interface Region {
 	void dispatchInternalEvent(Event event);
 
 	void setInitialTransition(InitialTransition initialTransition);
+	
+	void setFinalState(State finalState);
 
 	void addTransition(Transition transition);
 
@@ -19,5 +21,7 @@ public interface Region {
 	boolean tryConsumingEvent(Event event);
 	
 	boolean isActive();
+	
+	boolean hasReachedFinalState();
 
 }
