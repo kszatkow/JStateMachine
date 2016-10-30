@@ -3,7 +3,7 @@ package org.moomin.statemachine;
 import java.util.Deque;
 import java.util.LinkedList;
 
-public class StateMachine {
+public class StateMachine implements RegionOwner {
 
 	private Region ownedRegion;
 	Deque<Event> eventQueue = new LinkedList<>();
@@ -30,7 +30,7 @@ public class StateMachine {
 		eventQueue.addLast(event);
 	}
 
-	public void dispatchEventToQueueFront(Event event) {
+	public void dispatchInternalEvent(Event event) {
 		eventQueue.addFirst(event);
 	}
 	
@@ -43,5 +43,10 @@ public class StateMachine {
 		if (!ownedRegion.isActive()) {
 			throw new IllegalStateException(exceptionMessage);
 		}
+	}
+
+	@Override
+	public StateMachine containingStateMachine() {
+		return this;
 	}
 }

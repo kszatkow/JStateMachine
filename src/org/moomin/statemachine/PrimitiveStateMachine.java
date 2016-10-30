@@ -9,7 +9,7 @@ import java.util.Set;
 
 public class PrimitiveStateMachine implements Region {
 
-	private StateMachine owningStateMachine;
+	private RegionOwner owner;
 	private boolean isActive = false;
 	private InitialTransition initialTransition;
 	private Set<State> states = new HashSet<State>();
@@ -17,8 +17,8 @@ public class PrimitiveStateMachine implements Region {
 	private State activeState = State.NULL_STATE;
 	private State finalState;
 
-	public PrimitiveStateMachine(StateMachine owningStateMachine) {
-		this.owningStateMachine = owningStateMachine;
+	public PrimitiveStateMachine(RegionOwner owner) {
+		this.owner = owner;
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public class PrimitiveStateMachine implements Region {
 
 	@Override
 	public void dispatchInternalEvent(Event event) {
-		owningStateMachine.dispatchEventToQueueFront(event);
+		owner.dispatchInternalEvent(event);
 	}
 
 	private boolean isTransitionEnabled(Event event, Transition transition) {
@@ -148,7 +148,12 @@ public class PrimitiveStateMachine implements Region {
 
 	@Override
 	public StateMachine containingStateMachine() {
-		return owningStateMachine;
+		return owner.containingStateMachine();
+	}
+
+	@Override
+	public RegionOwner getOwner() {
+		return owner;
 	}
 
 }

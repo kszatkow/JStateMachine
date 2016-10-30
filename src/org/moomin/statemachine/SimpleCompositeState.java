@@ -1,11 +1,11 @@
 package org.moomin.statemachine;
 
-public abstract class SimpleCompositeState extends State {
+public abstract class SimpleCompositeState extends State implements RegionOwner {
 
 	private PrimitiveStateMachine ownedRegion;
 	
 	public SimpleCompositeState(StateMachine owningStateMachine) {
-		ownedRegion = new PrimitiveStateMachine(owningStateMachine);
+		ownedRegion = new PrimitiveStateMachine(this);
 	}
 	
 	/* (non-Javadoc)

@@ -24,4 +24,7 @@ public interface Region extends StateMachinePart {
 	
 	boolean hasReachedFinalState();
 
+	// TODO is this method necessary? it is used in tests only
+	RegionOwner getOwner();
+
 }
