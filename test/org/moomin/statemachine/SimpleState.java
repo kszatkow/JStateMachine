@@ -3,7 +3,7 @@ package org.moomin.statemachine;
 public abstract class SimpleState extends State {
 
 	@Override
-	public final boolean tryConsumingEvent(Event event) {
+	public final boolean consumeEvent(Event event) {
 		return false;
 	}
 	

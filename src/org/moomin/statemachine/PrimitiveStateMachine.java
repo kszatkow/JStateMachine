@@ -94,8 +94,8 @@ public class PrimitiveStateMachine extends SinglyActivatableObject implements Re
 	}
 
 	@Override
-	public boolean tryConsumingEvent(Event event) {
-		if (activeState.tryConsumingEvent(event)) {
+	public boolean consumeEvent(Event event) {
+		if (activeState.consumeEvent(event)) {
 			return true;
 		}
 		

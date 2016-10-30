@@ -26,7 +26,7 @@ public class StateMachine extends SinglyActivatableObject implements RegionOwner
 		while (!eventQueue.isEmpty()) {
 			Event event = eventQueue.poll();
 			
-			ownedRegion.tryConsumingEvent(event);
+			ownedRegion.consumeEvent(event);
 		}
 	}
 	

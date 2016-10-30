@@ -54,7 +54,6 @@ import org.moomin.statemachine.phone.StartDialing;
 
 /**
  *  TODO:
- *  - re-consider tryConsumingEvent method, e.g move it to another interface
  *  - resolve other TODOs
  */
 

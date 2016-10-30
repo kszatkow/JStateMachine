@@ -1,6 +1,7 @@
 package org.moomin.statemachine;
 
-public abstract class State extends MultiplyActivatableObject implements StateMachinePart {
+public abstract class State extends MultiplyActivatableObject 
+	implements StateMachinePart, EventConsumer {
 
 	private Region owningRegion;
 	
@@ -9,8 +10,6 @@ public abstract class State extends MultiplyActivatableObject implements StateMa
 	 */
 	public static final State NULL_STATE = new NoBehaviourSimpleState() {};
 	
-	
-	public abstract boolean tryConsumingEvent(Event event);
 	
 	protected abstract void onEntryBehaviour();
 	
