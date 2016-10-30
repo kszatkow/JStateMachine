@@ -63,7 +63,7 @@ public class PrimitiveStateMachine implements Region {
 	}
 
 	@Override
-	public State getActiveState() {
+	public State activeState() {
 		throwIfInIllegalInactiveState("State machine is inactive - no state is active at this stage, activate first.");
 		
 		return activeState;

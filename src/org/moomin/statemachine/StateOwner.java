@@ -2,6 +2,12 @@ package org.moomin.statemachine;
 
 public interface StateOwner {
 	
-	void addState(State substate);
+	void addState(State state);
+	
+	void setFinalState(State finalState);
+
+	State activeState();
+	
+	boolean hasReachedFinalState();
 	
 }

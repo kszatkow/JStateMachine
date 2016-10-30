@@ -17,8 +17,7 @@ public class RegionOwnerTest {
 
 	@Test
 	public void stateRegionOwnerTest() {
-		StateMachine stateMachine = new StateMachine();
-		SimpleCompositeState state = new DialingState(stateMachine, "RegionOwningState");
+		SimpleCompositeState state = new DialingState("RegionOwningState");
 		Region primitiveStateMachineRegion = new PrimitiveStateMachine(state);
 		
 		assertSame(state, primitiveStateMachineRegion.getOwner());

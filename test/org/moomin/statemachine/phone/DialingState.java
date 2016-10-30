@@ -1,13 +1,10 @@
 package org.moomin.statemachine.phone;
 
 import org.moomin.statemachine.SimpleCompositeState;
-import org.moomin.statemachine.StateMachine;
 
 public class DialingState extends SimpleCompositeState {
 
-	public DialingState(StateMachine owningStateMachine, String string) {
-		super(owningStateMachine);
-	}
+	public DialingState(String string) {}
 
 	@Override
 	public void onEntryBehaviour() {}

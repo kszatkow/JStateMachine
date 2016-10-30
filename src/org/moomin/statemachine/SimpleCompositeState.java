@@ -2,66 +2,18 @@ package org.moomin.statemachine;
 
 public abstract class SimpleCompositeState extends State implements RegionOwner {
 
-	private PrimitiveStateMachine ownedRegion;
+	private Region ownedRegion;
 	
-	public SimpleCompositeState(StateMachine owningStateMachine) {
-		ownedRegion = new PrimitiveStateMachine(this);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.moomin.statemachine.Region#reset()
-	 */
 	@Override
 	public void deactivate() {
 		ownedRegion.deactivate();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.moomin.statemachine.Region#activate()
-	 */
 	@Override
 	public void activate() {
 		ownedRegion.activate();
 	}
-
-	/* (non-Javadoc)
-	 * @see org.moomin.statemachine.Region#setInitialTransition(org.moomin.statemachine.InitialTransition)
-	 */
-	public void setInitialTransition(InitialTransition initialTransition) {
-		ownedRegion.setInitialTransition(initialTransition);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.moomin.statemachine.Region#addTransition(org.moomin.statemachine.Transition)
-	 */
-	public void addTransition(Transition transition) {
-		ownedRegion.addTransition(transition);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.moomin.statemachine.Region#getActiveState()
-	 */
-	public State getActiveState() {
-		return ownedRegion.getActiveState();
-	}
-
-	/* (non-Javadoc)
-	 * @see org.moomin.statemachine.Region#addState(org.moomin.statemachine.State)
-	 */
-	public void addState(State substate) {
-		ownedRegion.addState(substate);
-	}
 	
-	/* (non-Javadoc)
-	 * @see org.moomin.statemachine.Region#dispatchInternalEvent(org.moomin.statemachine.Event)
-	 */
-	public void dispatchInternalEvent(Event event) {
-		owningRegion.dispatchInternalEvent(event);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.moomin.statemachine.Region#tryConsumingEvent(org.moomin.statemachine.Event)
-	 */
 	@Override
 	public boolean tryConsumingEvent(Event event) {
 		boolean eventConsumed = ownedRegion.tryConsumingEvent(event);
@@ -76,7 +28,13 @@ public abstract class SimpleCompositeState extends State implements RegionOwner 
 		doActionBehaviour();
 	}
 	
-	public void setFinalSubstate(State finalState) {
-		ownedRegion.setFinalState(finalState);
+	@Override
+	public void addRegion(Region region) {
+		ownedRegion = region;	
+	}
+	
+	@Override
+	public void dispatchInternalEvent(Event event) {
+		owningRegion.dispatchInternalEvent(event);
 	}
 }

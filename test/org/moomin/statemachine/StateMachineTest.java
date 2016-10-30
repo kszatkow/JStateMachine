@@ -83,7 +83,7 @@ public class StateMachineTest {
 		assertFalse(initialTransitionTestEffect.hasBeenExecuted());
 		
 		stateMachine.activate();
-		assertSame(normalState, stateMachineRegion.getActiveState());
+		assertSame(normalState, stateMachineRegion.activeState());
 		assertTrue(initialTransitionTestEffect.hasBeenExecuted());
 	}
 
@@ -295,7 +295,7 @@ public class StateMachineTest {
 		
 		// no event dispatched - no transition
 		stateMachine.processEvent();
-		assertSame(idleState, stateMachineRegion.getActiveState());
+		assertSame(idleState, stateMachineRegion.activeState());
 	}
 	
 	@Test
@@ -495,7 +495,7 @@ public class StateMachineTest {
 				"Exception should have been thrown - illegal active state read.") {
 					@Override
 					protected void doAction() {
-						stateMachineRegion.getActiveState();
+						stateMachineRegion.activeState();
 					}
 		};
 		
@@ -582,7 +582,7 @@ public class StateMachineTest {
 	@Test
 	public void simpleCompositeStateTest() {
 		State phoneIdleState = addState(new PhoneIdleState("PhoneIdle"));
-		SimpleCompositeState dialingState = addSimpleCompositeState(new DialingState(stateMachine, "Dialing"));
+		SimpleCompositeState dialingState = addSimpleCompositeState(new DialingState("Dialing"));
 		State invalidState = addState(new InvalidNumberState("InvalidNumber"));
 		State connectingState = addState(new ConnectingState("Connecting"));
 		
@@ -592,38 +592,40 @@ public class StateMachineTest {
 		addTransition(invalidState, phoneIdleState, HangUpEvent.class);
 		addTransition(connectingState, phoneIdleState, HangUpEvent.class);
 		
-		StartDialing startDialingSubstate = (StartDialing) addSubstate(dialingState, new StartDialing("StartDialing"));
-		State partialDialSubstate = addSubstate(dialingState, new PartialDial("PartialDial"));
-		State dialingFinishedSubstate = addSubstate(dialingState, new DialingFinished("DialingFinished"));
+		Region dialingStateRegion = new PrimitiveStateMachine(dialingState);
+		dialingState.addRegion(dialingStateRegion);
+		StartDialing startDialingSubstate = (StartDialing) addSubstate(dialingStateRegion, new StartDialing("StartDialing"));
+		State partialDialSubstate = addSubstate(dialingStateRegion, new PartialDial("PartialDial"));
+		State dialingFinishedSubstate = addSubstate(dialingStateRegion, new DialingFinished("DialingFinished"));
 		
-		dialingState.setInitialTransition(new InitialTransition(startDialingSubstate, new TransitionTestEffect()));
-		dialingState.addTransition(new Transition(startDialingSubstate, partialDialSubstate, DigitEvent.class));
-		dialingState.addTransition(new Transition(partialDialSubstate, partialDialSubstate, DigitEvent.class));
-		dialingState.addTransition(new Transition(partialDialSubstate, dialingFinishedSubstate, FinishDialingEvent.class));
+		dialingStateRegion.setInitialTransition(new InitialTransition(startDialingSubstate, new TransitionTestEffect()));
+		dialingStateRegion.addTransition(new Transition(startDialingSubstate, partialDialSubstate, DigitEvent.class));
+		dialingStateRegion.addTransition(new Transition(partialDialSubstate, partialDialSubstate, DigitEvent.class));
+		dialingStateRegion.addTransition(new Transition(partialDialSubstate, dialingFinishedSubstate, FinishDialingEvent.class));
 		
 		setInitialTransitionAndActivate(phoneIdleState);
 	
 		// PhoneIdle -> Dialing::StartDialing
 		dispatchThenProcessEventAndCheckActiveState(new LiftReceiverEvent(), dialingState);
-		assertSame(startDialingSubstate, dialingState.getActiveState());
+		assertSame(startDialingSubstate, dialingStateRegion.activeState());
 		assertTrue(startDialingSubstate.isDialToneOn());
 		
 		// Dialing::StartDialing -> Dialing::PartialDial
 		dispatchThenProcessEventAndCheckActiveState(new DigitEvent(1) , dialingState);
-		assertSame(partialDialSubstate, dialingState.getActiveState());
+		assertSame(partialDialSubstate, dialingStateRegion.activeState());
 		assertFalse(startDialingSubstate.isDialToneOn());
 		
 		// Dialing::PartialDial -> Dialing::PartialDial
 		dispatchThenProcessEventAndCheckActiveState(new DigitEvent(2) , dialingState);
-		assertSame(partialDialSubstate, dialingState.getActiveState());
+		assertSame(partialDialSubstate, dialingStateRegion.activeState());
 		dispatchThenProcessEventAndCheckActiveState(new DigitEvent(3) , dialingState);
-		assertSame(partialDialSubstate, dialingState.getActiveState());
+		assertSame(partialDialSubstate, dialingStateRegion.activeState());
 		dispatchThenProcessEventAndCheckActiveState(new DigitEvent(4) , dialingState);
-		assertSame(partialDialSubstate, dialingState.getActiveState());
+		assertSame(partialDialSubstate, dialingStateRegion.activeState());
 		
 		// Dialing::PartialDial -> Dialing::DialingFinished
 		dispatchThenProcessEventAndCheckActiveState(new FinishDialingEvent() , dialingState);
-		assertSame(dialingFinishedSubstate, dialingState.getActiveState());
+		assertSame(dialingFinishedSubstate, dialingStateRegion.activeState());
 		
 		// Dialing::Finished -> Connecting
 		dispatchThenProcessEventAndCheckActiveState(new ConnectEvent() , connectingState);
@@ -633,15 +635,15 @@ public class StateMachineTest {
 		
 		// PhoneIdle -> Dialing::StartDialing
 		dispatchThenProcessEventAndCheckActiveState(new LiftReceiverEvent(), dialingState);
-		assertSame(startDialingSubstate, dialingState.getActiveState());
+		assertSame(startDialingSubstate, dialingStateRegion.activeState());
 		
 		// Dialing::PartialDial -> Dialing::PartialDial
 		dispatchThenProcessEventAndCheckActiveState(new DigitEvent(2) , dialingState);
-		assertSame(partialDialSubstate, dialingState.getActiveState());
+		assertSame(partialDialSubstate, dialingStateRegion.activeState());
 		
 		// Dialing::PartialDial -> Dialing::DialingFinished
 		dispatchThenProcessEventAndCheckActiveState(new FinishDialingEvent() , dialingState);
-		assertSame(dialingFinishedSubstate, dialingState.getActiveState());
+		assertSame(dialingFinishedSubstate, dialingStateRegion.activeState());
 		
 		// Dialing::Finished -> InvalidNumber
 		dispatchThenProcessEventAndCheckActiveState(new InvalidNumberEvent() , invalidState);
@@ -653,36 +655,38 @@ public class StateMachineTest {
 	@Test
 	public void completionTransitionInsideCompositeStateTest() {
 		State phoneIdleState = addState(new PhoneIdleState("PhoneIdle"));
-		SimpleCompositeState dialingState = addSimpleCompositeState(new DialingState(stateMachine, "Dialing"));
+		SimpleCompositeState dialingState = addSimpleCompositeState(new DialingState("Dialing"));
 		State connectingState = addState(new ConnectingState("Connecting"));
 		
 		addTransition(phoneIdleState, dialingState, LiftReceiverEvent.class);
 		addTransition(dialingState, connectingState, ConnectEvent.class);
 		addTransition(connectingState, phoneIdleState, HangUpEvent.class);
 		
-		StartDialing startDialingSubstate = (StartDialing) addSubstate(dialingState, new StartDialing("StartDialing"));
-		State partialDialSubstate = addSubstate(dialingState, new PartialDial("PartialDial"));
-		State dialingFinishedSubstate = addSubstate(dialingState, new DialingFinished("DialingFinished"));
+		Region dialingStateRegion = new PrimitiveStateMachine(dialingState);
+		dialingState.addRegion(dialingStateRegion);
+		StartDialing startDialingSubstate = (StartDialing) addSubstate(dialingStateRegion, new StartDialing("StartDialing"));
+		State partialDialSubstate = addSubstate(dialingStateRegion, new PartialDial("PartialDial"));
+		State dialingFinishedSubstate = addSubstate(dialingStateRegion, new DialingFinished("DialingFinished"));
 		
-		dialingState.setInitialTransition(new InitialTransition(startDialingSubstate, new TransitionTestEffect()));
-		dialingState.addTransition(new CompletionTransition(startDialingSubstate, partialDialSubstate));
-		dialingState.addTransition(new Transition(partialDialSubstate, partialDialSubstate, DigitEvent.class));
-		dialingState.addTransition(new Transition(partialDialSubstate, dialingFinishedSubstate, FinishDialingEvent.class));
+		dialingStateRegion.setInitialTransition(new InitialTransition(startDialingSubstate, new TransitionTestEffect()));
+		dialingStateRegion.addTransition(new CompletionTransition(startDialingSubstate, partialDialSubstate));
+		dialingStateRegion.addTransition(new Transition(partialDialSubstate, partialDialSubstate, DigitEvent.class));
+		dialingStateRegion.addTransition(new Transition(partialDialSubstate, dialingFinishedSubstate, FinishDialingEvent.class));
 		
 		setInitialTransitionAndActivate(phoneIdleState);
 		
 		// PhoneIdle -> Dialing::PartialDial
 		dispatchThenProcessEventAndCheckActiveState(new LiftReceiverEvent(), dialingState);
-		assertSame(partialDialSubstate, dialingState.getActiveState());
+		assertSame(partialDialSubstate, dialingStateRegion.activeState());
 		assertFalse(startDialingSubstate.isDialToneOn());
 		
 		// Dialing::PartialDial -> Dialing::PartialDial
 		dispatchThenProcessEventAndCheckActiveState(new DigitEvent(2) , dialingState);
-		assertSame(partialDialSubstate, dialingState.getActiveState());
+		assertSame(partialDialSubstate, dialingStateRegion.activeState());
 		
 		// Dialing::PartialDial -> Dialing::DialingFinished
 		dispatchThenProcessEventAndCheckActiveState(new FinishDialingEvent() , dialingState);
-		assertSame(dialingFinishedSubstate, dialingState.getActiveState());
+		assertSame(dialingFinishedSubstate, dialingStateRegion.activeState());
 		
 		// Dialing::Finished -> Connecting
 		dispatchThenProcessEventAndCheckActiveState(new ConnectEvent() , connectingState);
@@ -694,33 +698,35 @@ public class StateMachineTest {
 	@Test
 	public void completionTransitionFromCompositeStateTest() {
 		State phoneIdleState = addState(new PhoneIdleState("PhoneIdle"));
-		SimpleCompositeState dialingState = addSimpleCompositeState(new DialingState(stateMachine, "Dialing"));
+		SimpleCompositeState dialingState = addSimpleCompositeState(new DialingState("Dialing"));
 		State connectingState = addState(new ConnectingState("Connecting"));
 		
 		addTransition(phoneIdleState, dialingState, LiftReceiverEvent.class);
 		addCompletionTransition(dialingState, connectingState);
 		addTransition(connectingState, phoneIdleState, HangUpEvent.class);
 		
-		StartDialing startDialingSubstate = (StartDialing) addSubstate(dialingState, new StartDialing("StartDialing"));
-		State partialDialSubstate = addSubstate(dialingState, new PartialDial("PartialDial"));
-		State dialingFinishedSubstate = addSubstate(dialingState, new DialingFinished("DialingFinished"));
-		dialingState.setFinalSubstate(dialingFinishedSubstate);
+		Region dialingStateRegion = new PrimitiveStateMachine(dialingState);
+		dialingState.addRegion(dialingStateRegion);
+		StartDialing startDialingSubstate = (StartDialing) addSubstate(dialingStateRegion, new StartDialing("StartDialing"));
+		State partialDialSubstate = addSubstate(dialingStateRegion, new PartialDial("PartialDial"));
+		State dialingFinishedSubstate = addSubstate(dialingStateRegion, new DialingFinished("DialingFinished"));
+		dialingStateRegion.setFinalState(dialingFinishedSubstate);
 		
-		dialingState.setInitialTransition(new InitialTransition(startDialingSubstate, new TransitionTestEffect()));
-		dialingState.addTransition(new CompletionTransition(startDialingSubstate, partialDialSubstate));
-		dialingState.addTransition(new Transition(partialDialSubstate, partialDialSubstate, DigitEvent.class));
-		dialingState.addTransition(new Transition(partialDialSubstate, dialingFinishedSubstate, FinishDialingEvent.class));
+		dialingStateRegion.setInitialTransition(new InitialTransition(startDialingSubstate, new TransitionTestEffect()));
+		dialingStateRegion.addTransition(new CompletionTransition(startDialingSubstate, partialDialSubstate));
+		dialingStateRegion.addTransition(new Transition(partialDialSubstate, partialDialSubstate, DigitEvent.class));
+		dialingStateRegion.addTransition(new Transition(partialDialSubstate, dialingFinishedSubstate, FinishDialingEvent.class));
 		
 		setInitialTransitionAndActivate(phoneIdleState);
 		
 		// PhoneIdle -> Dialing::PartialDial
 		dispatchThenProcessEventAndCheckActiveState(new LiftReceiverEvent(), dialingState);
-		assertSame(partialDialSubstate, dialingState.getActiveState());
+		assertSame(partialDialSubstate, dialingStateRegion.activeState());
 		assertFalse(startDialingSubstate.isDialToneOn());
 		
 		// Dialing::PartialDial -> Dialing::PartialDial
 		dispatchThenProcessEventAndCheckActiveState(new DigitEvent(2) , dialingState);
-		assertSame(partialDialSubstate, dialingState.getActiveState());
+		assertSame(partialDialSubstate, dialingStateRegion.activeState());
 		
 		// Dialing::PartialDial -> Connecting
 		dispatchThenProcessEventAndCheckActiveState(new FinishDialingEvent() , connectingState);
@@ -732,26 +738,28 @@ public class StateMachineTest {
 	@Test
 	public void containingStateMachinenTest() {
 		State phoneIdleState = addState(new PhoneIdleState("PhoneIdle"));
-		SimpleCompositeState dialingState = addSimpleCompositeState(new DialingState(stateMachine, "Dialing"));
+		SimpleCompositeState dialingState = addSimpleCompositeState(new DialingState("Dialing"));
 		State connectingState = addState(new ConnectingState("Connecting"));
 		
 		Transition phoneIdleToDialingTransition = addTransition(phoneIdleState, dialingState, LiftReceiverEvent.class);
 		CompletionTransition dialingToConnectionTransition = addCompletionTransition(dialingState, connectingState);
 		Transition connectingToPhoneIdleTransition = addTransition(connectingState, phoneIdleState, HangUpEvent.class);
 		
-		StartDialing startDialingSubstate = (StartDialing) addSubstate(dialingState, new StartDialing("StartDialing"));
-		State partialDialSubstate = addSubstate(dialingState, new PartialDial("PartialDial"));
-		State dialingFinishedSubstate = addSubstate(dialingState, new DialingFinished("DialingFinished"));
-		dialingState.setFinalSubstate(dialingFinishedSubstate);
+		Region dialingStateRegion = new PrimitiveStateMachine(dialingState);
+		dialingState.addRegion(dialingStateRegion);
+		StartDialing startDialingSubstate = (StartDialing) addSubstate(dialingStateRegion, new StartDialing("StartDialing"));
+		State partialDialSubstate = addSubstate(dialingStateRegion, new PartialDial("PartialDial"));
+		State dialingFinishedSubstate = addSubstate(dialingStateRegion, new DialingFinished("DialingFinished"));
+		dialingStateRegion.setFinalState(dialingFinishedSubstate);
 		
 		InitialTransition initialDialingTransition = new InitialTransition(startDialingSubstate, new TransitionTestEffect());
-		dialingState.setInitialTransition(initialDialingTransition);
+		dialingStateRegion.setInitialTransition(initialDialingTransition);
 		CompletionTransition startDialingToPartialDialTransition = new CompletionTransition(startDialingSubstate, partialDialSubstate);
-		dialingState.addTransition(startDialingToPartialDialTransition);
+		dialingStateRegion.addTransition(startDialingToPartialDialTransition);
 		Transition partialDialInternalTransition = new Transition(partialDialSubstate, partialDialSubstate, DigitEvent.class);
-		dialingState.addTransition(partialDialInternalTransition);
+		dialingStateRegion.addTransition(partialDialInternalTransition);
 		Transition partialDialToDialingFinishedTransition = new Transition(partialDialSubstate, dialingFinishedSubstate, FinishDialingEvent.class);
-		dialingState.addTransition(partialDialToDialingFinishedTransition);
+		dialingStateRegion.addTransition(partialDialToDialingFinishedTransition);
 		
 		List<StateMachinePart> stateMachineParts = new ArrayList<>();
 		stateMachineParts.add(phoneIdleState);
@@ -768,14 +776,15 @@ public class StateMachineTest {
 		stateMachineParts.add(partialDialInternalTransition);
 		stateMachineParts.add(partialDialToDialingFinishedTransition);
 		stateMachineParts.add(stateMachineRegion);
+		stateMachineParts.add(dialingStateRegion);
 		
 		for(StateMachinePart part : stateMachineParts) {
 			assertSame(stateMachine, part.containingStateMachine());
 		}
 	}
 	
-	private State addSubstate(SimpleCompositeState compositeState, State substate) {
-		compositeState.addState(substate);
+	private State addSubstate(Region owningRegion, State substate) {
+		owningRegion.addState(substate);
 		return substate;
 	}
 	
@@ -860,6 +869,6 @@ public class StateMachineTest {
 	private void dispatchThenProcessEventAndCheckActiveState(Event event, State expectedState) {
 		stateMachine.dispatchEvent(event);
 		stateMachine.processEvent();
-		assertSame(expectedState, stateMachineRegion.getActiveState());
+		assertSame(expectedState, stateMachineRegion.activeState());
 	}
 }
