@@ -15,6 +15,8 @@ public abstract class State extends MultiplyActivatableObject
 	
 	protected abstract void doActionBehaviour();
 	
+	protected abstract void doActionClose();
+	
 	protected abstract void onExitBehaviour();
 	
 	
@@ -23,9 +25,11 @@ public abstract class State extends MultiplyActivatableObject
 		activate();
 	}
 	
-	// TODO - how to solve it better
-	public abstract void doAction();
-	
+	public final void doAction() {
+		doActionBehaviour();
+		doActionClose();
+	}
+
 	public final void onExit() {
 		deactivate();
 		onExitBehaviour();

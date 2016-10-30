@@ -17,8 +17,8 @@ public abstract class SimpleState extends State {
 		// empty on purpose
 	}
 
-	public void doAction() {
-		doActionBehaviour();
+	@Override
+	public final void doActionClose() {
 		containingStateMachine().dispatchInternalEvent(new CompletionEvent(this));
 	}
 	

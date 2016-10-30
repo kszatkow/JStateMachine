@@ -28,8 +28,8 @@ public abstract class SimpleCompositeState extends State implements RegionOwner 
 	}
 	
 	@Override
-	public void doAction() {
-		doActionBehaviour();
+	protected final void doActionClose() {
+		// empty on purpose
 	}
 	
 	@Override
