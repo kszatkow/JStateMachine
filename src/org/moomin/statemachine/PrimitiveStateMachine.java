@@ -7,10 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class PrimitiveStateMachine implements Region {
+public class PrimitiveStateMachine extends ActivatableObject implements Region {
 
 	private RegionOwner owner;
-	private boolean isActive = false;
 	private InitialTransition initialTransition;
 	private Set<State> states = new HashSet<State>();
 	private Map<State, List<Transition>> transitions = new HashMap<>();
@@ -23,7 +22,7 @@ public class PrimitiveStateMachine implements Region {
 
 	@Override
 	public void addState(State state) {
-		throwIfInIllegalActiveState("State addition is not allowed when state machine is active.");
+		assertInactive("State addition is not allowed when state machine is active.");
 		
 		if (states.contains(state)) {
 			throw new IllegalArgumentException("Duplicate state.");
@@ -41,7 +40,7 @@ public class PrimitiveStateMachine implements Region {
 
 	@Override
 	public void addTransition(Transition transition) {
-		throwIfInIllegalActiveState("Transition addition is not allowed when state machine is active.");
+		assertInactive("Transition addition is not allowed when state machine is active.");
 		
 		if (!states.contains(transition.source()) || !states.contains(transition.target()) ) {
 			throw new IllegalArgumentException("Invalid source of destination state.");
@@ -53,7 +52,7 @@ public class PrimitiveStateMachine implements Region {
 
 	@Override
 	public void setInitialTransition(InitialTransition initialTransition) {
-		throwIfInIllegalActiveState("Initial transition setup is not allowed when state machine is active.");
+		assertInactive("Initial transition setup is not allowed when state machine is active.");
 		
 		if (!states.contains(initialTransition.target())) {
 			throw new IllegalArgumentException("Invalid default state - state not contained in the state machine.");
@@ -64,7 +63,7 @@ public class PrimitiveStateMachine implements Region {
 
 	@Override
 	public State activeState() {
-		throwIfInIllegalInactiveState("State machine is inactive - no state is active at this stage, activate first.");
+		assertActive("State machine is inactive - no state is active at this stage, activate first.");
 		
 		return activeState;
 	}
@@ -84,28 +83,14 @@ public class PrimitiveStateMachine implements Region {
 	}
 
 	@Override
-	public void activate() {
-		throwIfInIllegalActiveState("State machine is already active.");
+	public void doActivate() {
+		assertInactive("State machine is already active.");
 		
-		isActive = true;
 		fireTransition(initialTransition);
 	}
 	
-	private void throwIfInIllegalActiveState(String exceptionMessage) {
-		if (isActive) {
-			throw new IllegalStateException(exceptionMessage);
-		}
-	}
-	
-	private void throwIfInIllegalInactiveState(String exceptionMessage) {
-		if (!isActive) {
-			throw new IllegalStateException(exceptionMessage);
-		}
-	}
-	
 	@Override
-	public void deactivate() {
-		isActive = false;
+	public void doDeactivate() {
 		activeState = State.NULL_STATE;
 	}
 
@@ -123,11 +108,6 @@ public class PrimitiveStateMachine implements Region {
 			}
 		}
 		return false;
-	}
-
-	@Override
-	public boolean isActive() {
-		return isActive;
 	}
 
 	@Override

@@ -5,14 +5,20 @@ public abstract class SimpleCompositeState extends State implements RegionOwner 
 	private Region ownedRegion;
 	
 	@Override
-	public void deactivate() {
+	protected final void doDeactivate() {
 		ownedRegion.deactivate();
 	}
 
 	@Override
-	public void activate() {
+	protected final void doActivate() {
 		ownedRegion.activate();
 	}
+
+	@Override
+	public boolean isActive() {
+		return ownedRegion.isActive();
+	}
+	
 	
 	@Override
 	public boolean tryConsumingEvent(Event event) {

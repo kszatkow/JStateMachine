@@ -1,6 +1,6 @@
 package org.moomin.statemachine;
 
-public abstract class State implements StateMachinePart {
+public abstract class State extends ActivatableObject implements StateMachinePart {
 
 	private Region owningRegion;
 	
@@ -11,10 +11,6 @@ public abstract class State implements StateMachinePart {
 	
 	
 	public abstract boolean tryConsumingEvent(Event event);
-	
-	public abstract void activate();
-
-	public abstract void deactivate();
 	
 	protected abstract void onEntryBehaviour();
 	

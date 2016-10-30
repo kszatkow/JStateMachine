@@ -54,7 +54,8 @@ import org.moomin.statemachine.phone.StartDialing;
 
 /**
  *  TODO:
- *  - introduce activatable interface
+ *  - make StateMachine activatable
+ *  - re-consider tryConsumingEvent method, e.g move it to another interface
  *  - extract proper interfaces and abstract classes - decide on responsibility split
  *     between Region, State and StateMachine
  *  - resolve other TODOs
@@ -603,31 +604,35 @@ public class StateMachineTest {
 		dialingStateRegion.addTransition(new Transition(partialDialSubstate, dialingFinishedSubstate, FinishDialingEvent.class));
 		
 		setInitialTransitionAndActivate(phoneIdleState);
-	
+		assertFalse(dialingState.isActive());
+		
 		// PhoneIdle -> Dialing::StartDialing
 		dispatchThenProcessEventAndCheckActiveState(new LiftReceiverEvent(), dialingState);
 		assertSame(startDialingSubstate, dialingStateRegion.activeState());
 		assertTrue(startDialingSubstate.isDialToneOn());
+		assertTrue(dialingState.isActive());
 		
 		// Dialing::StartDialing -> Dialing::PartialDial
 		dispatchThenProcessEventAndCheckActiveState(new DigitEvent(1) , dialingState);
 		assertSame(partialDialSubstate, dialingStateRegion.activeState());
 		assertFalse(startDialingSubstate.isDialToneOn());
+		assertTrue(dialingState.isActive());
 		
 		// Dialing::PartialDial -> Dialing::PartialDial
-		dispatchThenProcessEventAndCheckActiveState(new DigitEvent(2) , dialingState);
-		assertSame(partialDialSubstate, dialingStateRegion.activeState());
-		dispatchThenProcessEventAndCheckActiveState(new DigitEvent(3) , dialingState);
-		assertSame(partialDialSubstate, dialingStateRegion.activeState());
-		dispatchThenProcessEventAndCheckActiveState(new DigitEvent(4) , dialingState);
-		assertSame(partialDialSubstate, dialingStateRegion.activeState());
+		for (int digit = 2; digit <= 4; ++digit) {
+			dispatchThenProcessEventAndCheckActiveState(new DigitEvent(digit) , dialingState);
+			assertSame(partialDialSubstate, dialingStateRegion.activeState());
+			assertTrue(dialingState.isActive());
+		}
 		
 		// Dialing::PartialDial -> Dialing::DialingFinished
 		dispatchThenProcessEventAndCheckActiveState(new FinishDialingEvent() , dialingState);
 		assertSame(dialingFinishedSubstate, dialingStateRegion.activeState());
+		assertTrue(dialingState.isActive());
 		
 		// Dialing::Finished -> Connecting
 		dispatchThenProcessEventAndCheckActiveState(new ConnectEvent() , connectingState);
+		assertFalse(dialingState.isActive());
 		
 		// Connecting -> PhoneIdle
 		dispatchThenProcessEventAndCheckActiveState(new HangUpEvent() , phoneIdleState);

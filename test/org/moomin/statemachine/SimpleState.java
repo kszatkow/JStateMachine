@@ -8,12 +8,12 @@ public abstract class SimpleState extends State {
 	}
 	
 	@Override
-	public final void activate() {
+	protected final void doActivate() {
 		// empty on purpose
 	}
 
 	@Override
-	public final void deactivate() {
+	protected final void doDeactivate() {
 		// empty on purpose
 	}
 
