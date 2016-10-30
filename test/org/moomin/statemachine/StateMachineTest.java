@@ -54,10 +54,7 @@ import org.moomin.statemachine.phone.StartDialing;
 
 /**
  *  TODO:
- *  - make StateMachine activatable
  *  - re-consider tryConsumingEvent method, e.g move it to another interface
- *  - extract proper interfaces and abstract classes - decide on responsibility split
- *     between Region, State and StateMachine
  *  - resolve other TODOs
  */
 

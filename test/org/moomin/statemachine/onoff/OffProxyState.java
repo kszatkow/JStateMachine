@@ -1,27 +1,9 @@
 package org.moomin.statemachine.onoff;
 
-import org.moomin.statemachine.SimpleState;
+import org.moomin.statemachine.NoBehaviourSimpleState;
 
-public class OffProxyState extends SimpleState {
+public class OffProxyState extends NoBehaviourSimpleState {
 
 	public OffProxyState(String string) {}
-
-	@Override
-	public void onEntryBehaviour() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void doActionBehaviour() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onExitBehaviour() {
-		// TODO Auto-generated method stub
-
-	}
 
 }
