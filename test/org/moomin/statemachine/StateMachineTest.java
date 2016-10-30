@@ -74,6 +74,35 @@ public class StateMachineTest {
 	}
 	
 	@Test
+	public void activateDeactivateTest() {
+		State offState = addState(new OffState("Off"));
+		State onState = addState(new OnState("On"));
+		
+		addTransition(offState, onState, OnEvent.class);
+		addTransition(onState, offState, OffEvent.class);
+				
+		assertFalse(stateMachine.isActive());
+		setInitialTransitionAndActivate(offState);
+		assertTrue(stateMachine.isActive());
+		
+		// off -> on
+		dispatchThenProcessEventAndCheckActiveState(new OnEvent() , onState);
+		assertTrue(stateMachine.isActive());
+		
+		// deactivate - machine goes into default state
+		stateMachine.deactivate();
+		assertFalse(stateMachine.isActive());
+		
+		// activate again
+		stateMachine.activate();
+		assertTrue(stateMachine.isActive());
+		assertEquals(offState, stateMachineRegion.activeState());
+		
+		// off -> on
+		dispatchThenProcessEventAndCheckActiveState(new OnEvent() , onState);
+	}
+	
+	@Test
 	public void initialPseudostateTest() {
 		State normalState = addState(State.NULL_STATE);
 		
@@ -382,7 +411,7 @@ public class StateMachineTest {
 	}
 	
 	@Test 
-	public void illegalInitialTransitionSetupAfterActivationTest() {
+	public void illegalStateAdditionAfterActivationTest() {
 		State idleState = addState(new IdleState("Idle"));
 		addState(new ActiveState("Active"));
 		
@@ -403,7 +432,7 @@ public class StateMachineTest {
 	}
 	
 	@Test 
-	public void illegalStateAdditionAfterActivationTest() {
+	public void illegalInitialTransitionSetupAfterActivationTest() {
 		State idleState = addState(new IdleState("Idle"));
 		addState(new ActiveState("Active"));
 		
@@ -445,6 +474,27 @@ public class StateMachineTest {
 	}
 
 	@Test 
+	public void illegalRegionAdditionAfterActivationTest() {
+		State idleState = addState(new IdleState("Idle"));
+		addState(new ActiveState("Active"));
+		
+		setInitialTransitionAndActivate(idleState);
+		
+		// prepare exception thrown checker
+		ExceptionThrownChecker illegalTransitionAdditionChecker = new ExceptionThrownChecker(
+				IllegalStateException.class, 
+				"Exception should have been thrown - illegal region addition.") {
+					@Override
+					protected void doAction() {
+						stateMachine.addRegion(new PrimitiveStateMachine(stateMachine));
+					}
+		};
+		
+		// illegal action taken - exception thrown
+		illegalTransitionAdditionChecker.checkExceptionThrownAfterAction();
+	}
+	
+	@Test 
 	public void illegalDoubleActivationTest() {
 		State idleState = addState(new IdleState("Idle"));
 		addState(new ActiveState("Active"));
@@ -458,6 +508,28 @@ public class StateMachineTest {
 					@Override
 					protected void doAction() {
 						stateMachine.activate();
+					}
+		};
+		
+		// illegal action taken - exception thrown
+		illegalDoubleActivationChecker.checkExceptionThrownAfterAction();
+	}
+	
+	@Test 
+	public void illegalDoubleDeactivationTest() {
+		State idleState = addState(new IdleState("Idle"));
+		addState(new ActiveState("Active"));
+		
+		setInitialTransitionAndActivate(idleState);
+		stateMachine.deactivate();
+		
+		// prepare exception thrown checker
+		ExceptionThrownChecker illegalDoubleActivationChecker = new ExceptionThrownChecker(
+				IllegalStateException.class, 
+				"Exception should have been thrown - illegal double deactivation.") {
+					@Override
+					protected void doAction() {
+						stateMachine.deactivate();
 					}
 		};
 		
@@ -501,6 +573,43 @@ public class StateMachineTest {
 		
 		// illegal action taken - exception thrown
 		illegalTransitionAdditionChecker.checkExceptionThrownAfterAction();
+	}
+	
+
+	@Test
+	public void illegalEventDispatchBeforeActivationTest() {
+		addState(new IdleState("Idle"));
+		addState(new ActiveState("Active"));
+		
+		// prepare exception thrown checker for illegal dispatch
+		ExceptionThrownChecker illegalDispatchChecker = new ExceptionThrownChecker(
+				IllegalStateException.class, 
+				"Exception should have been thrown - illegal event dispatch.") {
+					@Override
+					protected void doAction() {
+						stateMachine.dispatchEvent(new OnEvent());
+					}
+		};
+		// illegal action taken - exception thrown
+		illegalDispatchChecker.checkExceptionThrownAfterAction();
+	}
+	
+	@Test
+	public void illegalInternalEventDispatchBeforeActivationTest() {
+		addState(new IdleState("Idle"));
+		addState(new ActiveState("Active"));
+		
+		// prepare exception thrown checker for illegal internal dispatch
+		ExceptionThrownChecker illegalInternalDispatchChecker = new ExceptionThrownChecker(
+				IllegalStateException.class, 
+				"Exception should have been thrown - illegal internal event dispatch.") {
+					@Override
+					protected void doAction() {
+						stateMachine.dispatchInternalEvent(new OnEvent());
+					}
+		};
+		// illegal action taken - exception thrown
+		illegalInternalDispatchChecker.checkExceptionThrownAfterAction();
 	}
 	
 	@Test

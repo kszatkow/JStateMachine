@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class PrimitiveStateMachine extends ActivatableObject implements Region {
+public class PrimitiveStateMachine extends SinglyActivatableObject implements Region {
 
 	private RegionOwner owner;
 	private InitialTransition initialTransition;
@@ -84,13 +84,12 @@ public class PrimitiveStateMachine extends ActivatableObject implements Region {
 
 	@Override
 	public void doActivate() {
-		assertInactive("State machine is already active.");
-		
 		fireTransition(initialTransition);
 	}
 	
 	@Override
 	public void doDeactivate() {
+		activeState.deactivate();
 		activeState = State.NULL_STATE;
 	}
 

@@ -1,6 +1,6 @@
 package org.moomin.statemachine;
 
-public abstract class State extends ActivatableObject implements StateMachinePart {
+public abstract class State extends MultiplyActivatableObject implements StateMachinePart {
 
 	private Region owningRegion;
 	

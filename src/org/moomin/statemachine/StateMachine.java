@@ -3,21 +3,25 @@ package org.moomin.statemachine;
 import java.util.Deque;
 import java.util.LinkedList;
 
-public class StateMachine implements RegionOwner {
+public class StateMachine extends SinglyActivatableObject implements RegionOwner {
 
 	private Region ownedRegion;
 	Deque<Event> eventQueue = new LinkedList<>();
 	
-	public StateMachine() {
-		
-	}
-	
+	@Override
 	public void addRegion(Region region) {
+		assertInactive("Region addition is not allowed when state machine is active.");
+		
 		ownedRegion = region;
 	}
 	
+	@Override
+	public StateMachine containingStateMachine() {
+		return this;
+	}
+	
 	public void processEvent() {
-		throwIfInIllegalInactiveState("Even processing not allowed when state machine is inactive, activate first.");
+		assertActive("Event processing not allowed when state machine is inactive, activate first.");
 		
 		while (!eventQueue.isEmpty()) {
 			Event event = eventQueue.poll();
@@ -27,26 +31,24 @@ public class StateMachine implements RegionOwner {
 	}
 	
 	public void dispatchEvent(Event event) {
+		assertActive("Event dispatching not allowed when state machine is inactive, activate first.");
+		
 		eventQueue.addLast(event);
 	}
 
 	public void dispatchInternalEvent(Event event) {
+		assertActive("Event dispatching not allowed when state machine is inactive, activate first.");
+		
 		eventQueue.addFirst(event);
-	}
-	
-	public void activate() {
-		ownedRegion.activate();
-	}
-
-	// TODO - code duplication - get rid of it
-	private void throwIfInIllegalInactiveState(String exceptionMessage) {
-		if (!ownedRegion.isActive()) {
-			throw new IllegalStateException(exceptionMessage);
-		}
 	}
 
 	@Override
-	public StateMachine containingStateMachine() {
-		return this;
+	protected void doDeactivate() {
+		ownedRegion.deactivate();
+	}
+
+	@Override
+	protected void doActivate() {
+		ownedRegion.activate();
 	}
 }
