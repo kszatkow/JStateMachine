@@ -1,6 +1,6 @@
 package org.moomin.statemachine;
 
-public interface Region extends StateMachinePart {
+public interface Region extends StateMachinePart, StateOwner, TransitionOwner {
 
 	void deactivate();
 
@@ -12,12 +12,8 @@ public interface Region extends StateMachinePart {
 	
 	void setFinalState(State finalState);
 
-	void addTransition(Transition transition);
-
 	State getActiveState();
 
-	void addState(State substate);
-	
 	boolean tryConsumingEvent(Event event);
 	
 	boolean isActive();
