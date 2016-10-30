@@ -19,7 +19,7 @@ public abstract class SimpleState extends State {
 
 	public void doAction() {
 		doActionBehaviour();
-		owningRegion.dispatchInternalEvent(new CompletionEvent(this));
+		containingStateMachine().dispatchInternalEvent(new CompletionEvent(this));
 	}
 	
 }

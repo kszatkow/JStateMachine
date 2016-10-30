@@ -54,8 +54,7 @@ import org.moomin.statemachine.phone.StartDialing;
 
 /**
  *  TODO:
- *  - add proper handling of owning state machines and owning regions: 
- *  	StateOwner and TransitionOwner to be implemented
+ *  - introduce activatable interface
  *  - extract proper interfaces and abstract classes - decide on responsibility split
  *     between Region, State and StateMachine
  *  - resolve other TODOs

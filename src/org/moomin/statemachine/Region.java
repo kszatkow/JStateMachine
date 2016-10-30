@@ -6,8 +6,6 @@ public interface Region extends StateMachinePart, StateOwner, TransitionOwner {
 
 	void activate();
 
-	void dispatchInternalEvent(Event event);
-
 	boolean tryConsumingEvent(Event event);
 	
 	boolean isActive();

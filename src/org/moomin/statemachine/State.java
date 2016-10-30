@@ -2,7 +2,7 @@ package org.moomin.statemachine;
 
 public abstract class State implements StateMachinePart {
 
-	protected Region owningRegion;
+	private Region owningRegion;
 	
 	/* 
 	 * Null object design pattern.

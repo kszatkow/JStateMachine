@@ -69,11 +69,6 @@ public class PrimitiveStateMachine implements Region {
 		return activeState;
 	}
 
-	@Override
-	public void dispatchInternalEvent(Event event) {
-		owner.dispatchInternalEvent(event);
-	}
-
 	private boolean isTransitionEnabled(Event event, Transition transition) {
 		return transition.isTriggerableBy(event) 
 				&& transition.evaluateGuardFor(event);

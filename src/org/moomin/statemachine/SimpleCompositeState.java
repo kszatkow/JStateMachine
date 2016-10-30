@@ -18,9 +18,13 @@ public abstract class SimpleCompositeState extends State implements RegionOwner 
 	public boolean tryConsumingEvent(Event event) {
 		boolean eventConsumed = ownedRegion.tryConsumingEvent(event);
 		if (eventConsumed && ownedRegion.hasReachedFinalState()) {
-			dispatchInternalEvent(new CompletionEvent(this));
+			dispatchCompletionEvent();
 		}
 		return eventConsumed;
+	}
+
+	private void dispatchCompletionEvent() {
+		containingStateMachine().dispatchInternalEvent(new CompletionEvent(this));
 	}
 	
 	@Override
@@ -33,8 +37,4 @@ public abstract class SimpleCompositeState extends State implements RegionOwner 
 		ownedRegion = region;	
 	}
 	
-	@Override
-	public void dispatchInternalEvent(Event event) {
-		owningRegion.dispatchInternalEvent(event);
-	}
 }
