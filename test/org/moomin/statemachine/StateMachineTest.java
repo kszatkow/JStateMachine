@@ -22,6 +22,7 @@ import org.moomin.statemachine.oddeven.EvenNumberGuard;
 import org.moomin.statemachine.oddeven.EvenNumberEvent;
 import org.moomin.statemachine.oddeven.EvenState;
 import org.moomin.statemachine.oddeven.FeedNumberEvent;
+import org.moomin.statemachine.oddeven.OddEvenStateMachineJunctionStateTestTemplateMethod;
 import org.moomin.statemachine.oddeven.OddNumberGuard;
 import org.moomin.statemachine.oddeven.OddNumberEvent;
 import org.moomin.statemachine.oddeven.OddState;
@@ -54,14 +55,76 @@ import org.moomin.statemachine.phone.StartDialing;
 
 /**
  *  TODO:
+ *  - finalize junction state implementation
  *  - resolve other TODOs
  */
 
 public class StateMachineTest {
 
+	private abstract class JunctionStateTestTemplate extends OddEvenStateMachineJunctionStateTestTemplateMethod {
+
+		protected JunctionState junctionState;
+		
+		protected State zeroState;
+		protected State oddState;
+		protected State evenState;
+		protected State checkParity;
+		
+		protected JunctionStateTestTemplate(JunctionState junctionState) {
+			this.junctionState = junctionState;
+		}
+		
+		@Override
+		protected void addStates() {
+			zeroState = addState(new ZeroState("Zero"));
+			oddState = addState(new OddState("Odd"));
+			evenState = addState(new EvenState("Even"));
+			checkParity = addState(junctionState);
+		}
+
+		@Override
+		protected void addJunctionIncomingTransitions() {
+			addTransition(zeroState, checkParity, FeedNumberEvent.class);
+			addTransition(oddState, checkParity, FeedNumberEvent.class);
+			addTransition(evenState, checkParity, FeedNumberEvent.class);
+		}
+
+		@Override
+		protected void setInitialTransitionAndActivate() {
+			StateMachineTest.this.setInitialTransitionAndActivate(zeroState);
+		}
+
+		@Override
+		protected void assertMachineWorking() {
+			// zero -> zero
+			dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(0), zeroState);
+			// zero -> odd
+			dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(3) , oddState);
+			// odd -> odd
+			dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(5) , oddState);
+			// odd -> zero
+			dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(0) , zeroState);
+			// zero -> even
+			dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(2) , evenState);
+			// even -> even
+			dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(12) , evenState);
+			// even -> zero
+			dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(0) , zeroState);
+			// zero -> odd
+			dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(13) , oddState);
+			// odd -> even
+			dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(18) , evenState);
+			// even -> odd
+			dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(15) , oddState);
+		}
+		
+	}
+
+	
 	private StateMachine stateMachine;
 	private Region stateMachineRegion;
 
+	
 	@Before
 	public void setUp() throws Exception {
 		stateMachine = new StateMachine();
@@ -642,46 +705,35 @@ public class StateMachineTest {
 	}
 	
 	@Test
-	public void junctionPseudostateTest() {
-		State zeroState = addState(new ZeroState("Zero"));
-		State oddState = addState(new OddState("Odd"));
-		State evenState = addState(new EvenState("Even"));
-		State checkParity = addState(new JunctionState("CheckParity"));
+	public void junctionStateWithoutElseTransitionTest() {
+		JunctionStateTestTemplate testJunctionWithoutElseTransition = 
+				new JunctionStateTestTemplate(new JunctionState("CheckParity")) {
+			@Override
+			protected void addJunctionOutgoingTransitions() {
+				addTransition(checkParity, evenState, FeedNumberEvent.class, new EvenNumberGuard());
+				addTransition(checkParity, oddState, FeedNumberEvent.class, new OddNumberGuard());
+				addTransition(checkParity, zeroState, FeedNumberEvent.class, new ZeroNumberGuard());
+			}
+		};
 		
-		addTransition(zeroState, checkParity, FeedNumberEvent.class);
-		addTransition(oddState, checkParity, FeedNumberEvent.class);
-		addTransition(evenState, checkParity, FeedNumberEvent.class);
-		addTransition(checkParity, evenState, FeedNumberEvent.class, new EvenNumberGuard());
-		addTransition(checkParity, oddState, FeedNumberEvent.class, new OddNumberGuard());
-		addTransition(checkParity, zeroState, FeedNumberEvent.class, new ZeroNumberGuard());
-		
-		setInitialTransitionAndActivate(zeroState);
-	
-		// zero -> zero
-		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(0), zeroState);
-		// zero -> odd
-		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(3) , oddState);
-		// odd -> odd
-		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(5) , oddState);
-		// odd -> zero
-		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(0) , zeroState);
-		// zero -> even
-		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(2) , evenState);
-		// even -> even
-		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(12) , evenState);
-		// even -> zero
-		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(0) , zeroState);
-		// zero -> odd
-		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(13) , oddState);
-		// odd -> even
-		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(18) , evenState);
-		// even -> odd
-		dispatchThenProcessTheSameEventTwiceAndCheckActiveState(new FeedNumberEvent(15) , oddState);
+		testJunctionWithoutElseTransition.test();
 	}
 
-	private void dispatchThenProcessTheSameEventTwiceAndCheckActiveState(Event event, State expectedActiveState) {
-		stateMachine.dispatchEvent(event);
-		dispatchThenProcessEventAndCheckActiveState(event, expectedActiveState);
+	@Test
+	public void junctionStateWithElseTransitionTest() {
+		JunctionState junctionState = new JunctionState("CheckParity");
+		JunctionStateTestTemplate testJunctionWithElseTransition = 
+				new JunctionStateTestTemplate(junctionState) {
+			@Override
+			protected void addJunctionOutgoingTransitions() {
+				addTransition(checkParity, evenState, FeedNumberEvent.class, new EvenNumberGuard());
+				addTransition(checkParity, oddState, FeedNumberEvent.class, new OddNumberGuard());
+				Transition elseTransition = new Transition(checkParity, zeroState, FeedNumberEvent.class);
+				junctionState.addElseTrasition(elseTransition);
+			}
+		};
+		
+		testJunctionWithElseTransition.test();
 	}
 	
 	@Test
@@ -821,7 +873,7 @@ public class StateMachineTest {
 		State dialingFinishedSubstate = addSubstate(dialingStateRegion, new DialingFinished("DialingFinished"));
 		dialingStateRegion.setFinalState(dialingFinishedSubstate);
 		
-		dialingStateRegion.setInitialTransition(new PrimitiveTransition(startDialingSubstate, new TransitionTestEffect()));
+		dialingStateRegion.setInitialTransition(new PrimitiveTransition(startDialingSubstate));
 		dialingStateRegion.addTransition(new CompletionTransition(startDialingSubstate, partialDialSubstate));
 		dialingStateRegion.addTransition(new Transition(partialDialSubstate, partialDialSubstate, DigitEvent.class));
 		dialingStateRegion.addTransition(new Transition(partialDialSubstate, dialingFinishedSubstate, FinishDialingEvent.class));
@@ -980,4 +1032,10 @@ public class StateMachineTest {
 		stateMachine.processEvent();
 		assertSame(expectedState, stateMachineRegion.activeState());
 	}
+	
+	private void dispatchTwiceThenProcessAndCheckActiveState(Event event, State expectedActiveState) {
+		stateMachine.dispatchEvent(event);
+		dispatchThenProcessEventAndCheckActiveState(event, expectedActiveState);
+	}
+	
 }

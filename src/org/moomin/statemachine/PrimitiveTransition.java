@@ -11,6 +11,10 @@ public class PrimitiveTransition implements StateMachinePart {
 		this.effect = effect;
 	}
 
+	public PrimitiveTransition(State target) {
+		this(target, () -> {});
+	}
+	
 	public State target() {
 		return target;
 	}

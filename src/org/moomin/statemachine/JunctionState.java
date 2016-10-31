@@ -1,8 +1,17 @@
 package org.moomin.statemachine;
 
-// TODO implement real junction state logic here
 public class JunctionState extends NoBehaviourSimpleState {
 
-	public JunctionState(String string) {	}
+	private Transition elseTransition = null;
+	
+	public JunctionState(String string) {}
+
+	public void addElseTrasition(Transition elseTransition) {
+		this.elseTransition = elseTransition;
+	}
+	
+	public Transition getElseTransition() {
+		return elseTransition;
+	}
 
 }

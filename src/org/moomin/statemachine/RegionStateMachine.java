@@ -105,6 +105,21 @@ public class RegionStateMachine extends SinglyActivatableObject implements Regio
 				return true;
 			}
 		}
+		
+		// TODO - to be refactored
+		return handleSpecialCases(event);
+	}
+
+	private boolean handleSpecialCases(Event event) {
+		if (activeState instanceof JunctionState) {
+			JunctionState activeJunctionState = (JunctionState) activeState;
+			Transition elseTransition = activeJunctionState.getElseTransition();
+			if( elseTransition != null && elseTransition.isTriggerableBy(event) ) {
+				fireTransition(elseTransition);
+				return true;
+			}
+		}
+		
 		return false;
 	}
 
