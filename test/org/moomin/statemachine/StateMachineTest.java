@@ -65,7 +65,7 @@ public class StateMachineTest {
 	@Before
 	public void setUp() throws Exception {
 		stateMachine = new StateMachine();
-		stateMachineRegion = new PrimitiveStateMachine(stateMachine);
+		stateMachineRegion = new RegionStateMachine(stateMachine);
 		stateMachine.addRegion(stateMachineRegion);
 	}
 	
@@ -482,7 +482,7 @@ public class StateMachineTest {
 				"Exception should have been thrown - illegal region addition.") {
 					@Override
 					protected void doAction() {
-						stateMachine.addRegion(new PrimitiveStateMachine(stateMachine));
+						stateMachine.addRegion(new RegionStateMachine(stateMachine));
 					}
 		};
 		
@@ -697,7 +697,7 @@ public class StateMachineTest {
 		addTransition(invalidState, phoneIdleState, HangUpEvent.class);
 		addTransition(connectingState, phoneIdleState, HangUpEvent.class);
 		
-		Region dialingStateRegion = new PrimitiveStateMachine(dialingState);
+		Region dialingStateRegion = new RegionStateMachine(dialingState);
 		dialingState.addRegion(dialingStateRegion);
 		StartDialing startDialingSubstate = (StartDialing) addSubstate(dialingStateRegion, new StartDialing("StartDialing"));
 		State partialDialSubstate = addSubstate(dialingStateRegion, new PartialDial("PartialDial"));
@@ -771,7 +771,7 @@ public class StateMachineTest {
 		addTransition(dialingState, connectingState, ConnectEvent.class);
 		addTransition(connectingState, phoneIdleState, HangUpEvent.class);
 		
-		Region dialingStateRegion = new PrimitiveStateMachine(dialingState);
+		Region dialingStateRegion = new RegionStateMachine(dialingState);
 		dialingState.addRegion(dialingStateRegion);
 		StartDialing startDialingSubstate = (StartDialing) addSubstate(dialingStateRegion, new StartDialing("StartDialing"));
 		State partialDialSubstate = addSubstate(dialingStateRegion, new PartialDial("PartialDial"));
@@ -814,7 +814,7 @@ public class StateMachineTest {
 		addCompletionTransition(dialingState, connectingState);
 		addTransition(connectingState, phoneIdleState, HangUpEvent.class);
 		
-		Region dialingStateRegion = new PrimitiveStateMachine(dialingState);
+		Region dialingStateRegion = new RegionStateMachine(dialingState);
 		dialingState.addRegion(dialingStateRegion);
 		StartDialing startDialingSubstate = (StartDialing) addSubstate(dialingStateRegion, new StartDialing("StartDialing"));
 		State partialDialSubstate = addSubstate(dialingStateRegion, new PartialDial("PartialDial"));
@@ -854,7 +854,7 @@ public class StateMachineTest {
 		CompletionTransition dialingToConnectionTransition = addCompletionTransition(dialingState, connectingState);
 		Transition connectingToPhoneIdleTransition = addTransition(connectingState, phoneIdleState, HangUpEvent.class);
 		
-		Region dialingStateRegion = new PrimitiveStateMachine(dialingState);
+		Region dialingStateRegion = new RegionStateMachine(dialingState);
 		dialingState.addRegion(dialingStateRegion);
 		StartDialing startDialingSubstate = (StartDialing) addSubstate(dialingStateRegion, new StartDialing("StartDialing"));
 		State partialDialSubstate = addSubstate(dialingStateRegion, new PartialDial("PartialDial"));

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class PrimitiveStateMachine extends SinglyActivatableObject implements Region {
+public class RegionStateMachine extends SinglyActivatableObject implements Region {
 
 	private RegionOwner owner;
 	private InitialTransition initialTransition;
@@ -16,7 +16,7 @@ public class PrimitiveStateMachine extends SinglyActivatableObject implements Re
 	private State activeState = State.NULL_STATE;
 	private State finalState;
 
-	public PrimitiveStateMachine(RegionOwner owner) {
+	public RegionStateMachine(RegionOwner owner) {
 		this.owner = owner;
 	}
 

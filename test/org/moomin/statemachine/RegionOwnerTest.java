@@ -10,7 +10,7 @@ public class RegionOwnerTest {
 	@Test
 	public void stateMachineRegionOwnerTest() {
 		StateMachine stateMachine = new StateMachine();
-		Region primitiveStateMachineRegion = new PrimitiveStateMachine(stateMachine);
+		Region primitiveStateMachineRegion = new RegionStateMachine(stateMachine);
 		
 		assertSame(stateMachine, primitiveStateMachineRegion.getOwner());
 	}
@@ -18,7 +18,7 @@ public class RegionOwnerTest {
 	@Test
 	public void stateRegionOwnerTest() {
 		SimpleCompositeState state = new DialingState("RegionOwningState");
-		Region primitiveStateMachineRegion = new PrimitiveStateMachine(state);
+		Region primitiveStateMachineRegion = new RegionStateMachine(state);
 		
 		assertSame(state, primitiveStateMachineRegion.getOwner());
 	}
