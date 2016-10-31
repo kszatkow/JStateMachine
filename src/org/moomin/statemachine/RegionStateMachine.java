@@ -125,9 +125,4 @@ public class RegionStateMachine extends SinglyActivatableObject implements Regio
 		return owner.containingStateMachine();
 	}
 
-	@Override
-	public RegionOwner getOwner() {
-		return owner;
-	}
-
 }
