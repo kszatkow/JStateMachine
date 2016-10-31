@@ -703,7 +703,7 @@ public class StateMachineTest {
 		State partialDialSubstate = addSubstate(dialingStateRegion, new PartialDial("PartialDial"));
 		State dialingFinishedSubstate = addSubstate(dialingStateRegion, new DialingFinished("DialingFinished"));
 		
-		dialingStateRegion.setInitialTransition(new InitialTransition(startDialingSubstate, new TransitionTestEffect()));
+		dialingStateRegion.setInitialTransition(new PrimitiveTransition(startDialingSubstate, new TransitionTestEffect()));
 		dialingStateRegion.addTransition(new Transition(startDialingSubstate, partialDialSubstate, DigitEvent.class));
 		dialingStateRegion.addTransition(new Transition(partialDialSubstate, partialDialSubstate, DigitEvent.class));
 		dialingStateRegion.addTransition(new Transition(partialDialSubstate, dialingFinishedSubstate, FinishDialingEvent.class));
@@ -777,7 +777,7 @@ public class StateMachineTest {
 		State partialDialSubstate = addSubstate(dialingStateRegion, new PartialDial("PartialDial"));
 		State dialingFinishedSubstate = addSubstate(dialingStateRegion, new DialingFinished("DialingFinished"));
 		
-		dialingStateRegion.setInitialTransition(new InitialTransition(startDialingSubstate, new TransitionTestEffect()));
+		dialingStateRegion.setInitialTransition(new PrimitiveTransition(startDialingSubstate, new TransitionTestEffect()));
 		dialingStateRegion.addTransition(new CompletionTransition(startDialingSubstate, partialDialSubstate));
 		dialingStateRegion.addTransition(new Transition(partialDialSubstate, partialDialSubstate, DigitEvent.class));
 		dialingStateRegion.addTransition(new Transition(partialDialSubstate, dialingFinishedSubstate, FinishDialingEvent.class));
@@ -821,7 +821,7 @@ public class StateMachineTest {
 		State dialingFinishedSubstate = addSubstate(dialingStateRegion, new DialingFinished("DialingFinished"));
 		dialingStateRegion.setFinalState(dialingFinishedSubstate);
 		
-		dialingStateRegion.setInitialTransition(new InitialTransition(startDialingSubstate, new TransitionTestEffect()));
+		dialingStateRegion.setInitialTransition(new PrimitiveTransition(startDialingSubstate, new TransitionTestEffect()));
 		dialingStateRegion.addTransition(new CompletionTransition(startDialingSubstate, partialDialSubstate));
 		dialingStateRegion.addTransition(new Transition(partialDialSubstate, partialDialSubstate, DigitEvent.class));
 		dialingStateRegion.addTransition(new Transition(partialDialSubstate, dialingFinishedSubstate, FinishDialingEvent.class));
@@ -861,7 +861,7 @@ public class StateMachineTest {
 		State dialingFinishedSubstate = addSubstate(dialingStateRegion, new DialingFinished("DialingFinished"));
 		dialingStateRegion.setFinalState(dialingFinishedSubstate);
 		
-		InitialTransition initialDialingTransition = new InitialTransition(startDialingSubstate, new TransitionTestEffect());
+		PrimitiveTransition initialDialingTransition = new PrimitiveTransition(startDialingSubstate, new TransitionTestEffect());
 		dialingStateRegion.setInitialTransition(initialDialingTransition);
 		CompletionTransition startDialingToPartialDialTransition = new CompletionTransition(startDialingSubstate, partialDialSubstate);
 		dialingStateRegion.addTransition(startDialingToPartialDialTransition);
@@ -972,7 +972,7 @@ public class StateMachineTest {
 	}
 	
 	private void setInitialTransition(State target, TransitionEffect effect) {
-		stateMachineRegion.setInitialTransition(new InitialTransition(target, effect));
+		stateMachineRegion.setInitialTransition(new PrimitiveTransition(target, effect));
 	}
 	
 	private void dispatchThenProcessEventAndCheckActiveState(Event event, State expectedState) {

@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Transition extends InitialTransition {
+public class Transition extends PrimitiveTransition {
 
 	protected State source;
 	

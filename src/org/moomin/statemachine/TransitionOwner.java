@@ -4,6 +4,6 @@ public interface TransitionOwner {
 	
 	void addTransition(Transition transition);
 	
-	void setInitialTransition(InitialTransition initialTransition);
+	void setInitialTransition(PrimitiveTransition initialTransition);
 	
 }

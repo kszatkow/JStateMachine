@@ -1,12 +1,12 @@
 package org.moomin.statemachine;
 
-public class InitialTransition implements StateMachinePart {
+public class PrimitiveTransition implements StateMachinePart {
 
 	protected State target;
 	
 	protected TransitionEffect effect;
 	
-	public InitialTransition(State target, TransitionEffect effect) {
+	public PrimitiveTransition(State target, TransitionEffect effect) {
 		this.target = target;
 		this.effect = effect;
 	}

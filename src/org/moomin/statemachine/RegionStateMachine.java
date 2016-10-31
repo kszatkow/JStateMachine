@@ -10,7 +10,7 @@ import java.util.Set;
 public class RegionStateMachine extends SinglyActivatableObject implements Region {
 
 	private RegionOwner owner;
-	private InitialTransition initialTransition;
+	private PrimitiveTransition initialTransition;
 	private Set<State> states = new HashSet<State>();
 	private Map<State, List<Transition>> transitions = new HashMap<>();
 	private State activeState = State.NULL_STATE;
@@ -51,7 +51,7 @@ public class RegionStateMachine extends SinglyActivatableObject implements Regio
 	}
 
 	@Override
-	public void setInitialTransition(InitialTransition initialTransition) {
+	public void setInitialTransition(PrimitiveTransition initialTransition) {
 		assertInactive("Initial transition setup is not allowed when state machine is active.");
 		
 		if (!states.contains(initialTransition.target())) {
@@ -73,8 +73,7 @@ public class RegionStateMachine extends SinglyActivatableObject implements Regio
 				&& transition.evaluateGuardFor(event);
 	}
 
-	// TODO - why is this initial transition?
-	private void fireTransition(InitialTransition transition) {
+	private void fireTransition(PrimitiveTransition transition) {
 		activeState.onExit();
 		transition.takeEffect();
 		activeState = transition.target();
