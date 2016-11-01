@@ -1,5 +1,6 @@
 package org.moomin.statemachine.phone;
 
+import org.moomin.statemachine.Event;
 import org.moomin.statemachine.SimpleState;
 
 public class StartDialing extends SimpleState {
@@ -9,7 +10,7 @@ public class StartDialing extends SimpleState {
 	public StartDialing(String string) {}
 
 	@Override
-	public void onEntryBehaviour() {
+	public void onEntryBehaviour(Event event) {
 		toneDialer.startDialTone();
 	}
 

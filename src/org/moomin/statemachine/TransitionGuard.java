@@ -2,6 +2,6 @@ package org.moomin.statemachine;
 
 public interface TransitionGuard {
 
-	public boolean evaluate(Event event);
+	public boolean evaluate(State source, Event event);
 	
 }

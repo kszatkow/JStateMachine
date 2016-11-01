@@ -3,7 +3,7 @@ package org.moomin.statemachine;
 import java.util.LinkedList;
 import java.util.List;
 
-public class JunctionState extends NoBehaviourSimpleState {
+public abstract class JunctionState extends SimpleState {
 
 	private Transition elseTransition = null;
 	

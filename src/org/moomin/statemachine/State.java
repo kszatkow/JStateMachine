@@ -25,7 +25,7 @@ public abstract class State extends MultiplyActivatableObject
 	}
 	
 	
-	protected abstract void onEntryBehaviour();
+	protected abstract void onEntryBehaviour(Event entryEvent);
 	
 	protected abstract void doActionBehaviour();
 	
@@ -34,8 +34,8 @@ public abstract class State extends MultiplyActivatableObject
 	protected abstract void onExitBehaviour();
 	
 	
-	public final void onEntry() {
-		onEntryBehaviour();
+	public final void onEntry(Event entryEvent) {
+		onEntryBehaviour(entryEvent);
 		activate();
 	}
 	

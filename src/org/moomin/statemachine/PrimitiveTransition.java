@@ -24,7 +24,6 @@ public class PrimitiveTransition implements StateMachinePart {
 	}
 	
 	public StateMachine containingStateMachine() {
-		// TODO - think if it can stay this way
 		return target.containingStateMachine();
 	}
 }

@@ -1,5 +1,6 @@
 package org.moomin.statemachine.idleactive;
 
+import org.moomin.statemachine.Event;
 import org.moomin.statemachine.SimpleState;
 
 public class ActiveStateWithDoActionBehaviour extends SimpleState {
@@ -9,7 +10,7 @@ public class ActiveStateWithDoActionBehaviour extends SimpleState {
 	public ActiveStateWithDoActionBehaviour(String name) {}
 	
 	@Override
-	public void onEntryBehaviour() {
+	public void onEntryBehaviour(Event event) {
 		// empty on purpose
 
 	}

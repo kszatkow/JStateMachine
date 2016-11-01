@@ -68,17 +68,17 @@ public class RegionStateMachine extends SinglyActivatableObject implements Regio
 		return activeState;
 	}
 
-	private void fireTransition(PrimitiveTransition transition) {
+	private void fireTransition(Event event, PrimitiveTransition transition) {
 		activeState.onExit();
 		transition.takeEffect();
 		activeState = transition.target();
-		activeState.onEntry();
+		activeState.onEntry(event);
 		activeState.doAction();
 	}
 
 	@Override
 	public void doActivate() {
-		fireTransition(initialTransition);
+		fireTransition(null, initialTransition);
 	}
 	
 	@Override
@@ -96,7 +96,7 @@ public class RegionStateMachine extends SinglyActivatableObject implements Regio
 		List<Transition> outgoingFromActiveState = transitions.get(activeState);
 		Transition transitionToFire = activeState.selectTransitionToFire(outgoingFromActiveState, event);
 		if (transitionToFire != null) {
-			fireTransition(transitionToFire);
+			fireTransition(event, transitionToFire);
 			return true;
 		}
 		

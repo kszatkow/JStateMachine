@@ -9,7 +9,7 @@ public class NoBehaviourSimpleState extends SimpleState {
 	protected NoBehaviourSimpleState() {}
 	
 	@Override
-	public final void onEntryBehaviour() {
+	public final void onEntryBehaviour(Event event) {
 		// empty on purpose
 	}
 

@@ -1,5 +1,6 @@
 package org.moomin.statemachine.idleactive;
 
+import org.moomin.statemachine.Event;
 import org.moomin.statemachine.SimpleState;
 
 public class IdleStateWithOnEntryAndOnExitBehaviours extends SimpleState {
@@ -11,7 +12,7 @@ public class IdleStateWithOnEntryAndOnExitBehaviours extends SimpleState {
 	public IdleStateWithOnEntryAndOnExitBehaviours(String name) {}
 	
 	@Override
-	public void onEntryBehaviour() {
+	public void onEntryBehaviour(Event event) {
 		onEntryDone = true;
 	}
 

@@ -4,12 +4,11 @@ import org.moomin.statemachine.Event;
 import org.moomin.statemachine.State;
 import org.moomin.statemachine.TransitionGuard;
 
-public class ZeroNumberGuard implements TransitionGuard {
-
+public final class ZeroNumberCompletionGuard implements TransitionGuard {
 	@Override
 	public boolean evaluate(State source, Event event) {
-		FeedNumberEvent actualEvent = (FeedNumberEvent) event;
-		return actualEvent.getNumber() == 0;
+		ParityJunctionState actualState = (ParityJunctionState) source;
+		int number = actualState.getLastNumber();
+		return (number == 0);
 	}
-
 }

@@ -7,6 +7,18 @@ import java.util.Set;
 
 public class Transition extends PrimitiveTransition {
 
+	private static final class NoTransitionGuard implements TransitionGuard {
+
+		@Override
+		public boolean evaluate(State source, Event event) {
+			return true;
+		}
+		
+	}
+	
+	private static final TransitionGuard NO_GUARD = new NoTransitionGuard();
+	
+	
 	protected State source;
 	
 	private Set<Class<? extends Event>> triggerableBy = new HashSet<>();
@@ -33,12 +45,12 @@ public class Transition extends PrimitiveTransition {
 	public Transition(State source, State target, 
 			Collection<Class<? extends Event>> triggerableBy, 
 			TransitionEffect effect) {
-		this(source, target, triggerableBy, event -> true, effect);
+		this(source, target, triggerableBy, NO_GUARD, effect);
 	}
 
 	public Transition(State source, State target, 
 			Collection<Class<? extends Event>> triggerableBy) {
-		this(source, target, triggerableBy, event -> true, () -> {});
+		this(source, target, triggerableBy, NO_GUARD, () -> {});
 	}
 	
 	public Transition(State source, State target, 
@@ -56,12 +68,12 @@ public class Transition extends PrimitiveTransition {
 
 	public Transition(State source, State target, 
 			Class<? extends Event> eventClass, TransitionEffect effect) {
-		this(source, target, eventClass, event -> true, effect);
+		this(source, target, eventClass, NO_GUARD, effect);
 	}
 
 	public Transition(State source, State target, 
 			Class<? extends Event> eventClass) {
-		this(source, target, eventClass, event -> true, () -> {});
+		this(source, target, eventClass, NO_GUARD, () -> {});
 	}
 
 	
@@ -79,7 +91,7 @@ public class Transition extends PrimitiveTransition {
 	}
 	
 	public boolean evaluateGuardFor(Event event) {
-		return guard.evaluate(event);
+		return guard.evaluate(source, event);
 	}
 
 }
