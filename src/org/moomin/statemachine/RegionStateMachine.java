@@ -68,11 +68,6 @@ public class RegionStateMachine extends SinglyActivatableObject implements Regio
 		return activeState;
 	}
 
-	private boolean isTransitionEnabled(Event event, Transition transition) {
-		return transition.isTriggerableBy(event) 
-				&& transition.evaluateGuardFor(event);
-	}
-
 	private void fireTransition(PrimitiveTransition transition) {
 		activeState.onExit();
 		transition.takeEffect();
@@ -99,25 +94,10 @@ public class RegionStateMachine extends SinglyActivatableObject implements Regio
 		}
 		
 		List<Transition> outgoingFromActiveState = transitions.get(activeState);
-		for (Transition transition : outgoingFromActiveState) {
-			if( isTransitionEnabled(event, transition) ) {
-				fireTransition(transition);
-				return true;
-			}
-		}
-		
-		// TODO - to be refactored
-		return handleSpecialCases(event);
-	}
-
-	private boolean handleSpecialCases(Event event) {
-		if (activeState instanceof JunctionState) {
-			JunctionState activeJunctionState = (JunctionState) activeState;
-			Transition elseTransition = activeJunctionState.getElseTransition();
-			if( elseTransition != null && elseTransition.isTriggerableBy(event) ) {
-				fireTransition(elseTransition);
-				return true;
-			}
+		Transition transitionToFire = activeState.selectTransitionToFire(outgoingFromActiveState, event);
+		if (transitionToFire != null) {
+			fireTransition(transitionToFire);
+			return true;
 		}
 		
 		return false;

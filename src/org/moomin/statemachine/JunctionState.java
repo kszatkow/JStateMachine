@@ -1,5 +1,8 @@
 package org.moomin.statemachine;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class JunctionState extends NoBehaviourSimpleState {
 
 	private Transition elseTransition = null;
@@ -10,8 +13,15 @@ public class JunctionState extends NoBehaviourSimpleState {
 		this.elseTransition = elseTransition;
 	}
 	
-	public Transition getElseTransition() {
-		return elseTransition;
+	@Override
+	public Transition selectTransitionToFire(List<Transition> outgoingTransitions, 
+			Event event) {
+		List<Transition> allOutgoingTransitions = new LinkedList<>(outgoingTransitions);
+		if (elseTransition != null) {
+			allOutgoingTransitions.add(elseTransition);
+		}
+		
+		return super.selectTransitionToFire(allOutgoingTransitions, event);
 	}
-
+	
 }
