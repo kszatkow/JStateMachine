@@ -3,11 +3,11 @@ package org.moomin.statemachine.oddeven;
 import org.moomin.statemachine.Event;
 import org.moomin.statemachine.JunctionState;
 
-public class ParityJunctionState extends JunctionState {
+public class CheckParityJunctionState extends JunctionState {
 
 	private int lastNumber = 0; 
 	
-	public ParityJunctionState(String string) {
+	public CheckParityJunctionState(String string) {
 		super(string);
 	}
 	

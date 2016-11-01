@@ -7,7 +7,7 @@ import org.moomin.statemachine.TransitionGuard;
 public final class ZeroNumberCompletionGuard implements TransitionGuard {
 	@Override
 	public boolean evaluate(State source, Event event) {
-		ParityJunctionState actualState = (ParityJunctionState) source;
+		CheckParityJunctionState actualState = (CheckParityJunctionState) source;
 		int number = actualState.getLastNumber();
 		return (number == 0);
 	}

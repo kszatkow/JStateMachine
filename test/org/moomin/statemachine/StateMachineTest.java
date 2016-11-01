@@ -28,7 +28,7 @@ import org.moomin.statemachine.oddeven.OddNumberCompletionGuard;
 import org.moomin.statemachine.oddeven.OddNumberGuard;
 import org.moomin.statemachine.oddeven.OddNumberEvent;
 import org.moomin.statemachine.oddeven.OddState;
-import org.moomin.statemachine.oddeven.ParityJunctionState;
+import org.moomin.statemachine.oddeven.CheckParityJunctionState;
 import org.moomin.statemachine.oddeven.ZeroNumberCompletionGuard;
 import org.moomin.statemachine.oddeven.ZeroNumberEvent;
 import org.moomin.statemachine.oddeven.ZeroNumberGuard;
@@ -714,7 +714,7 @@ public class StateMachineTest {
 	
 	@Test
 	public void junctionStateOutgoingCompletionTransitionsWithoutElseTransitionTest() {
-		ParityJunctionState junctionState = new ParityJunctionState("CheckParity");
+		CheckParityJunctionState junctionState = new CheckParityJunctionState("CheckParity");
 		JunctionStateTestTemplate testJunctionOutgoingCompletionTransitionsWithoutElseTransition = 
 				new JunctionStateTestTemplate(junctionState) {
 			
@@ -740,7 +740,7 @@ public class StateMachineTest {
 	
 	@Test
 	public void junctionStateOutgoingCompletionTransitionsWithElseTransitionTest() {
-		ParityJunctionState junctionState = new ParityJunctionState("CheckParity");
+		CheckParityJunctionState junctionState = new CheckParityJunctionState("CheckParity");
 		JunctionStateTestTemplate testJunctionWithElseTransitionAndOutgoingCompletionTransitions = 
 				new JunctionStateTestTemplate(junctionState) {
 			
