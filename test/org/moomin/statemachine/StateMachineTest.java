@@ -77,9 +77,13 @@ public class StateMachineTest {
 
 		@Override
 		protected void addJunctionIncomingTransitions() {
-			addTransition(zeroState, checkParity, FeedNumberEvent.class);
-			addTransition(oddState, checkParity, FeedNumberEvent.class);
-			addTransition(evenState, checkParity, FeedNumberEvent.class);
+			// various NoGuardTransition constructors used to improve code coverage
+			addTransition(new NoGuardTransition(zeroState, checkParity, 
+					Collections.singletonList(FeedNumberEvent.class)));
+			addTransition(new NoGuardTransition(oddState, checkParity, 
+					Collections.singletonList(FeedNumberEvent.class), 
+					new TransitionTestEffect()));
+			addTransition(new NoGuardTransition(evenState, checkParity, FeedNumberEvent.class));
 		}
 
 		@Override
@@ -105,7 +109,7 @@ public class StateMachineTest {
 		stateMachineRegion = new RegionStateMachine(stateMachine);
 		stateMachine.addRegion(stateMachineRegion);
 	}
-	
+
 	@Test
 	public void activateDeactivateTest() {
 		State offState = addState(new OffState("Off"));
@@ -688,8 +692,6 @@ public class StateMachineTest {
 				addTransition(checkParity, oddState, FeedNumberEvent.class, new OddNumberGuard());
 				addTransition(checkParity, zeroState, FeedNumberEvent.class, new ZeroNumberGuard());
 			}
-
-			
 		};
 		
 		testJunctionWithoutElseTransition.test();
@@ -698,18 +700,21 @@ public class StateMachineTest {
 	@Test
 	public void junctionStateWithElseTransitionTest() {
 		JunctionState junctionState = new NoBehaviourJunctionState("CheckParity");
+		TransitionTestEffect elseTransitionAction = new TransitionTestEffect();
 		JunctionStateTestTemplate testJunctionWithElseTransition = 
 				new JunctionStateTestTemplate(junctionState) {
 			@Override
 			protected void addJunctionOutgoingTransitions() {
 				addTransition(checkParity, evenState, FeedNumberEvent.class, new EvenNumberGuard());
 				addTransition(checkParity, oddState, FeedNumberEvent.class, new OddNumberGuard());
-				Transition elseTransition = new Transition(checkParity, zeroState, FeedNumberEvent.class);
-				junctionState.addElseTrasition(elseTransition);
+				junctionState.setElseTrasition(new NoGuardTransition(checkParity, zeroState, 
+						FeedNumberEvent.class, elseTransitionAction));
 			}
 		};
 		
+		assertFalse(elseTransitionAction.hasBeenExecuted());
 		testJunctionWithElseTransition.test();
+		assertTrue(elseTransitionAction.hasBeenExecuted());
 	}
 	
 	@Test
@@ -750,8 +755,7 @@ public class StateMachineTest {
 						new EvenNumberCompeltionGuard());
 				addTransition(checkParity, oddState, CompletionEvent.class, 
 						new OddNumberCompletionGuard());
-				Transition elseTransition = new Transition(checkParity, zeroState, CompletionEvent.class);
-				junctionState.addElseTrasition(elseTransition);
+				junctionState.setElseTrasition(new NoGuardTransition(checkParity, zeroState, CompletionEvent.class));
 			}
 	
 			@Override
@@ -985,6 +989,10 @@ public class StateMachineTest {
 	
 	private SimpleCompositeState addSimpleCompositeState(SimpleCompositeState state) {
 		return (SimpleCompositeState) addState(state);
+	}
+	
+	private void addTransition(Transition transition) {
+		stateMachineRegion.addTransition(transition);
 	}
 	
 	private Transition addTransition(State source, State target, Class<? extends Event> triggerableBy) {

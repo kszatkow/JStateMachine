@@ -9,7 +9,7 @@ public abstract class JunctionState extends SimpleState {
 	
 	public JunctionState(String string) {}
 
-	public void addElseTrasition(Transition elseTransition) {
+	public void setElseTrasition(NoGuardTransition elseTransition) {
 		this.elseTransition = elseTransition;
 	}
 	
