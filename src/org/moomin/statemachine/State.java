@@ -58,7 +58,7 @@ public abstract class State extends MultiplyActivatableObject
 	}
 
 	
-	private static boolean isTransitionEnabled(Event event, Transition transition) {
+	protected static boolean isTransitionEnabled(Event event, Transition transition) {
 		return transition.isTriggerableBy(event) 
 				&& transition.evaluateGuardFor(event);
 	}
