@@ -1,6 +1,7 @@
 package org.moomin.statemachine;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,6 +12,8 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.moomin.statemachine.idleactive.ActiveState;
 import org.moomin.statemachine.idleactive.ActiveStateWithDoActionBehaviour;
 import org.moomin.statemachine.idleactive.IdleState;
@@ -66,8 +69,10 @@ import org.moomin.statemachine.taskrouter.WaitForTaskState;
 
 /**
  *  TODO:
- *  - refactor StateMachineTest into more specialized test case classes, e.g. JunctionTest, ChoiceTest etc.
+ *  - refactor StateMachineTest into more specialized test case classes, 
+ *  	e.g. JunctionTest, ChoiceTest etc. Start using Mockito:)
  */
+@RunWith(MockitoJUnitRunner.class)
 public class StateMachineTest {
 
 	private abstract class JunctionStateTestTemplate extends OddEvenStateMachineJunctionStateTest {
@@ -93,7 +98,7 @@ public class StateMachineTest {
 					Collections.singletonList(FeedNumberEvent.class)));
 			addTransition(new NoGuardTransition(oddState, checkParity, 
 					Collections.singletonList(FeedNumberEvent.class), 
-					new TransitionTestEffect()));
+					mock(TransitionEffect.class)));
 			addTransition(new NoGuardTransition(evenState, checkParity, FeedNumberEvent.class));
 		}
 
@@ -152,16 +157,16 @@ public class StateMachineTest {
 	
 	@Test
 	public void initialPseudostateTest() {
-		State normalState = addState(State.NULL_STATE);
+		State normalState = addState(mock(State.class));
 		
-		TransitionTestEffect initialTransitionTestEffect = new TransitionTestEffect();
-		setInitialTransition(normalState, initialTransitionTestEffect);
+		TransitionEffect initialTransitionEffectMock = mock(TransitionEffect.class);
+		setInitialTransition(normalState, initialTransitionEffectMock);
 		
-		assertFalse(initialTransitionTestEffect.hasBeenExecuted());
+		verify(initialTransitionEffectMock, never()).execute();
 		
 		stateMachine.activate();
 		assertSame(normalState, stateMachineRegion.activeState());
-		assertTrue(initialTransitionTestEffect.hasBeenExecuted());
+		verify(initialTransitionEffectMock).execute();
 	}
 
 	@Test
@@ -198,17 +203,17 @@ public class StateMachineTest {
 		addTransition(offState, onProxyState, OnEvent.class);
 		addCompletionTransition(onProxyState, onState);
 		addTransition(onState, offProxyState, OffEvent.class);
-		TransitionTestEffect effect = new TransitionTestEffect();
-		addCompletionTransition(offProxyState, offState, effect);
+		TransitionEffect effectMock = mock(TransitionEffect.class);
+		addCompletionTransition(offProxyState, offState, effectMock);
 				
 		setInitialTransitionAndActivate(offState);
 	
 		// off -> on
 		dispatchThenProcessEventAndCheckActiveState(new OnEvent() , onState);
 		// on -> off
-		assertFalse(effect.hasBeenExecuted());
+		verify(effectMock, never()).execute();
 		dispatchThenProcessEventAndCheckActiveState(new OffEvent() , offState);
-		assertTrue(effect.hasBeenExecuted());
+		verify(effectMock).execute();
 	}
 	
 	@Test
@@ -222,8 +227,8 @@ public class StateMachineTest {
 		addTransition(offState, onProxyState, OnEvent.class);
 		addCompletionTransition(onProxyState, onState, guard);
 		addTransition(onState, offProxyState, OffEvent.class);
-		TransitionTestEffect effect = new TransitionTestEffect();
-		addCompletionTransition(offProxyState, offState, guard, effect);
+		TransitionEffect effectMock = mock(TransitionEffect.class);
+		addCompletionTransition(offProxyState, offState, guard, effectMock);
 				
 		setInitialTransitionAndActivate(offState);
 	
@@ -236,11 +241,11 @@ public class StateMachineTest {
 		// on -> off unsuccessful - guard evaluates to false
 		guard.evaluateToFalse();
 		dispatchThenProcessEventAndCheckActiveState(new OffEvent() , offProxyState);
-		assertFalse(effect.hasBeenExecuted());
+		verify(effectMock, never()).execute();
 		// on -> off
 		guard.evaluateToTrue();
 		dispatchThenProcessEventAndCheckActiveState(new CompletionEvent(offProxyState) , offState);
-		assertTrue(effect.hasBeenExecuted());
+		verify(effectMock).execute();	
 	}
 	
 	@Test
@@ -711,7 +716,7 @@ public class StateMachineTest {
 	@Test
 	public void junctionStateWithElseTransitionTest() {
 		JunctionState junctionState = new NoBehaviourJunctionState("CheckParity");
-		TransitionTestEffect elseTransitionAction = new TransitionTestEffect();
+		TransitionEffect elseTransitionEffectMock = mock(TransitionEffect.class);
 		JunctionStateTestTemplate testJunctionWithElseTransition = 
 				new JunctionStateTestTemplate(junctionState) {
 			@Override
@@ -719,13 +724,13 @@ public class StateMachineTest {
 				addTransition(checkParity, evenState, FeedNumberEvent.class, new EvenNumberGuard());
 				addTransition(checkParity, oddState, FeedNumberEvent.class, new OddNumberGuard());
 				junctionState.setElseTrasition(new NoGuardTransition(checkParity, zeroState, 
-						FeedNumberEvent.class, elseTransitionAction));
+						FeedNumberEvent.class, elseTransitionEffectMock));
 			}
 		};
 		
-		assertFalse(elseTransitionAction.hasBeenExecuted());
+		verify(elseTransitionEffectMock, never()).execute();
 		testJunctionWithElseTransition.test();
-		assertTrue(elseTransitionAction.hasBeenExecuted());
+		verify(elseTransitionEffectMock, times(3)).execute();
 	}
 	
 	@Test
@@ -798,7 +803,7 @@ public class StateMachineTest {
 		State partialDialSubstate = addSubstate(dialingStateRegion, new PartialDial("PartialDial"));
 		State dialingFinishedSubstate = addSubstate(dialingStateRegion, new DialingFinished("DialingFinished"));
 		
-		dialingStateRegion.setInitialTransition(new PrimitiveTransition(startDialingSubstate, new TransitionTestEffect()));
+		dialingStateRegion.setInitialTransition(new PrimitiveTransition(startDialingSubstate, mock(TransitionEffect.class)));
 		dialingStateRegion.addTransition(new Transition(startDialingSubstate, partialDialSubstate, DigitEvent.class));
 		dialingStateRegion.addTransition(new Transition(partialDialSubstate, partialDialSubstate, DigitEvent.class));
 		dialingStateRegion.addTransition(new Transition(partialDialSubstate, dialingFinishedSubstate, FinishDialingEvent.class));
@@ -872,7 +877,7 @@ public class StateMachineTest {
 		State partialDialSubstate = addSubstate(dialingStateRegion, new PartialDial("PartialDial"));
 		State dialingFinishedSubstate = addSubstate(dialingStateRegion, new DialingFinished("DialingFinished"));
 		
-		dialingStateRegion.setInitialTransition(new PrimitiveTransition(startDialingSubstate, new TransitionTestEffect()));
+		dialingStateRegion.setInitialTransition(new PrimitiveTransition(startDialingSubstate, mock(TransitionEffect.class)));
 		dialingStateRegion.addTransition(new CompletionTransition(startDialingSubstate, partialDialSubstate));
 		dialingStateRegion.addTransition(new Transition(partialDialSubstate, partialDialSubstate, DigitEvent.class));
 		dialingStateRegion.addTransition(new Transition(partialDialSubstate, dialingFinishedSubstate, FinishDialingEvent.class));
@@ -956,7 +961,7 @@ public class StateMachineTest {
 		State dialingFinishedSubstate = addSubstate(dialingStateRegion, new DialingFinished("DialingFinished"));
 		dialingStateRegion.setFinalState(dialingFinishedSubstate);
 		
-		PrimitiveTransition initialDialingTransition = new PrimitiveTransition(startDialingSubstate, new TransitionTestEffect());
+		PrimitiveTransition initialDialingTransition = new PrimitiveTransition(startDialingSubstate, mock(TransitionEffect.class));
 		dialingStateRegion.setInitialTransition(initialDialingTransition);
 		CompletionTransition startDialingToPartialDialTransition = new CompletionTransition(startDialingSubstate, partialDialSubstate);
 		dialingStateRegion.addTransition(startDialingToPartialDialTransition);
