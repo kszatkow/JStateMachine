@@ -38,11 +38,9 @@ import org.moomin.statemachine.oddeven.ZeroNumberGuard;
 import org.moomin.statemachine.oddeven.ZeroState;
 import org.moomin.statemachine.onoff.OffEvent;
 import org.moomin.statemachine.onoff.OffProxyState;
-import org.moomin.statemachine.onoff.OffState;
 import org.moomin.statemachine.onoff.OnEvent;
 import org.moomin.statemachine.onoff.OnOffTransitionGuard;
 import org.moomin.statemachine.onoff.OnProxyState;
-import org.moomin.statemachine.onoff.OnState;
 import org.moomin.statemachine.onoff.Switch;
 import org.moomin.statemachine.onoff.TurnOffEffect;
 import org.moomin.statemachine.onoff.TurnOnEffect;
@@ -128,8 +126,8 @@ public class StateMachineTest {
 
 	@Test
 	public void activateDeactivateTest() {
-		State offState = addState(new OffState("Off"));
-		State onState = addState(new OnState("On"));
+		State offState = addState(spy(State.class));
+		State onState = addState(spy(State.class));
 		
 		addTransition(offState, onState, OnEvent.class);
 		addTransition(onState, offState, OffEvent.class);
@@ -171,8 +169,8 @@ public class StateMachineTest {
 
 	@Test
 	public void transitionsWithoutGuardsTest() {
-		State offState = addState(new OffState("Off"));
-		State onState = addState(new OnState("On"));
+		State offState = addState(spy(State.class));
+		State onState = addState(spy(State.class));
 		
 		addTransition(offState, onState, OnEvent.class);
 		addTransition(onState, offState, OffEvent.class);
@@ -195,9 +193,9 @@ public class StateMachineTest {
 
 	@Test
 	public void simpleStateCompletionTransitionWithoutGuardTest() {
-		State offState = addState(new OffState("Off"));
+		State offState = addState(spy(State.class));
 		State onProxyState = addState(new OnProxyState("OnProxy"));
-		State onState = addState(new OnState("On"));
+		State onState = addState(spy(State.class));
 		State offProxyState = addState(new OffProxyState("OnProxy"));
 		
 		addTransition(offState, onProxyState, OnEvent.class);
@@ -218,9 +216,9 @@ public class StateMachineTest {
 	
 	@Test
 	public void simpleStateCompletionTransitionWithGuardTest() {
-		State offState = addState(new OffState("Off"));
+		State offState = addState(spy(State.class));
 		State onProxyState = addState(new OnProxyState("OnProxy"));
-		State onState = addState(new OnState("On"));
+		State onState = addState(spy(State.class));
 		State offProxyState = addState(new OffProxyState("OnProxy"));
 		
 		OnOffTransitionGuard guard =  new OnOffTransitionGuard();
@@ -312,8 +310,8 @@ public class StateMachineTest {
 	
 	@Test
 	public void transitionEffectTest() {
-		State offState = addState(new OffState("Off"));
-		State onState = addState(new OnState("On"));
+		State offState = addState(spy(State.class));
+		State onState = addState(spy(State.class));
 		
 		// use two different transition constructors on purpose
 		Switch offOnSwitch = new Switch();
@@ -400,8 +398,8 @@ public class StateMachineTest {
 		State activeState = addState(new ActiveState("Active"));
 		
 		// illegal states
-		State offState = new OffState("Off");
-		State onState = new OnState("On");
+		State offState = mock(State.class);
+		State onState = mock(State.class);
 		
 		setInitialTransition(idleState, null);
 		
@@ -455,7 +453,7 @@ public class StateMachineTest {
 				"Exception should have been thrown - invalid default state set.") {
 					@Override
 					protected void doAction() {
-						setInitialTransitionAndActivate(new OnState("On"));
+						setInitialTransitionAndActivate(mock(State.class));
 					}
 		};
 		
@@ -497,7 +495,7 @@ public class StateMachineTest {
 				"Exception should have been thrown - illegal state addition.") {
 					@Override
 					protected void doAction() {
-						setInitialTransition(new OnState(""), null);
+						setInitialTransition(mock(State.class), null);
 					}
 		};
 		
@@ -518,7 +516,7 @@ public class StateMachineTest {
 				"Exception should have been thrown - illegal transition addition.") {
 					@Override
 					protected void doAction() {
-						addTransition(idleState, new OnState(""), OnEvent.class);
+						addTransition(idleState, mock(State.class), OnEvent.class);
 					}
 		};
 		
