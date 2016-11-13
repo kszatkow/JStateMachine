@@ -43,7 +43,7 @@ public class RegionStateMachine extends SinglyActivatableObject implements Regio
 		assertInactive("Transition addition is not allowed when state machine is active.");
 		
 		if (!states.contains(transition.source()) || !states.contains(transition.target()) ) {
-			throw new IllegalArgumentException("Invalid source of destination state.");
+			throw new IllegalArgumentException("Invalid source or destination state.");
 		}
 		
 		List<Transition> transitionsFromSource = transitions.get(transition.source());
