@@ -21,7 +21,7 @@ public class StateMachine extends SinglyActivatableObject implements RegionOwner
 	}
 	
 	public void processEvent() {
-		assertActive("Event processing not allowed when state machine is inactive, activate first.");
+		assertActive("Event processing is not allowed when state machine is inactive, activate first.");
 		
 		while (!eventQueue.isEmpty()) {
 			Event event = eventQueue.poll();
@@ -31,13 +31,13 @@ public class StateMachine extends SinglyActivatableObject implements RegionOwner
 	}
 	
 	public void dispatchEvent(Event event) {
-		assertActive("Event dispatching not allowed when state machine is inactive, activate first.");
+		assertActive("Event dispatching is not allowed when state machine is inactive, activate first.");
 		
 		eventQueue.addLast(event);
 	}
 
 	public void dispatchInternalEvent(Event event) {
-		assertActive("Event dispatching not allowed when state machine is inactive, activate first.");
+		assertActive("Event dispatching is not allowed when state machine is inactive, activate first.");
 		
 		eventQueue.addFirst(event);
 	}

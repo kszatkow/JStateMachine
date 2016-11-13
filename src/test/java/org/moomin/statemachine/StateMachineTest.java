@@ -2,6 +2,7 @@ package org.moomin.statemachine;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
+import static org.hamcrest.core.StringContains.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,9 +12,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.junit.rules.ExpectedException;
 import org.moomin.statemachine.idleactive.ActiveState;
 import org.moomin.statemachine.idleactive.ActiveStateWithDoActionBehaviour;
 import org.moomin.statemachine.idleactive.IdleState;
@@ -116,6 +119,8 @@ public class StateMachineTest {
 	private StateMachine stateMachine;
 	private Region stateMachineRegion;
 
+	@Rule
+	public ExpectedException exception = ExpectedException.none();
 	
 	@Before
 	public void setUp() throws Exception {
@@ -392,10 +397,9 @@ public class StateMachineTest {
 	}
 	
 	@Test
-	public void illegalSourceOrTargetStateTransitionTest() {
+	public void illegalSourceAndTargetStateTransitionTest() {
 		// legal states
 		State idleState = addState(new IdleState("Idle"));
-		State activeState = addState(new ActiveState("Active"));
 		
 		// illegal states
 		State offState = mock(State.class);
@@ -403,22 +407,46 @@ public class StateMachineTest {
 		
 		setInitialTransition(idleState, null);
 		
-		// prepare exception thrown checker
-		ExceptionThrownIllegalTransitionChecker illegalTransitionChecker = new ExceptionThrownIllegalTransitionChecker(
-				IllegalArgumentException.class, 
-				"Exception should have been thrown - illegal transition added.",
-				stateMachineRegion);
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(containsString("Invalid source or destination state"));
 		
-		// illegal transition - both states illegal
-		illegalTransitionChecker.setIllegalTransition(new Transition(offState, onState, OnEvent.class));
-		illegalTransitionChecker.checkExceptionThrownAfterAction();
+		// illegal transition - both states invalid
+		stateMachineRegion.addTransition(new Transition(offState, onState, OnEvent.class));
+	}
+
+	@Test
+	public void illegalSourceStateTransitionTest() {
+		// legal states
+		State idleState = addState(new IdleState("Idle"));
+		State activeState = addState(new ActiveState("Active"));
 		
-		// illegal transition - source state illegal
-		illegalTransitionChecker.setIllegalTransition(new Transition(offState, activeState, OnEvent.class));
+		// illegal states
+		State offState = mock(State.class);
 		
-		// illegal transition - target state illegal
-		illegalTransitionChecker.setIllegalTransition(new Transition(idleState, onState, OffEvent.class));
-		illegalTransitionChecker.checkExceptionThrownAfterAction();
+		setInitialTransition(idleState, null);
+		
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(containsString("Invalid source or destination state"));
+		
+		// illegal transition - source state invalid
+		stateMachineRegion.addTransition(new Transition(offState, activeState, OnEvent.class));
+	}
+	
+	@Test
+	public void illegalDestinationStateTransitionTest() {
+		// legal states
+		State idleState = addState(new IdleState("Idle"));
+		
+		// illegal states
+		State onState = mock(State.class);
+		
+		setInitialTransition(idleState, null);
+		
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(containsString("Invalid source or destination state"));
+		
+		// illegal transition - target state invalid
+		stateMachineRegion.addTransition(new Transition(idleState, onState, OffEvent.class));
 	}
 
 	@Test
@@ -427,18 +455,10 @@ public class StateMachineTest {
 		State idleState = addState(new IdleState("Idle"));
 		addState(new ActiveState("Active"));
 		
-		// prepare exception thrown checker
-		ExceptionThrownChecker duplicateStateChecker = new ExceptionThrownChecker(
-				IllegalArgumentException.class, 
-				"Exception should have been thrown - duplicate state added.") {
-					@Override
-					protected void doAction() {
-						addState(idleState);
-					}
-		};
-		
-		// duplicate state added - exception thrown
-		duplicateStateChecker.checkExceptionThrownAfterAction();
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(containsString("Duplicate state"));
+
+		addState(idleState);
 	}
 	
 	@Test 
@@ -446,19 +466,11 @@ public class StateMachineTest {
 		// legal states
 		addState(new IdleState("Idle"));
 		addState(new ActiveState("Active"));
+
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(containsString("Invalid default state"));
 		
-		// prepare exception thrown checker
-		ExceptionThrownChecker invalidDefaultStateChecker = new ExceptionThrownChecker(
-				IllegalArgumentException.class, 
-				"Exception should have been thrown - invalid default state set.") {
-					@Override
-					protected void doAction() {
-						setInitialTransitionAndActivate(mock(State.class));
-					}
-		};
-		
-		// invalid default state chosen - exception thrown
-		invalidDefaultStateChecker.checkExceptionThrownAfterAction();
+		setInitialTransitionAndActivate(mock(State.class));
 	}
 	
 	@Test 
@@ -467,19 +479,11 @@ public class StateMachineTest {
 		addState(new ActiveState("Active"));
 		
 		setInitialTransitionAndActivate(idleState);
-		
-		// prepare exception thrown checker
-		ExceptionThrownChecker illegalStateAdditionChecker = new ExceptionThrownChecker(
-				IllegalStateException.class, 
-				"Exception should have been thrown - illegal initial transition setup.") {
-					@Override
-					protected void doAction() {
-						stateMachineRegion.addState(State.NULL_STATE);
-					}
-		};
-		
-		// illegal action taken - exception thrown
-		illegalStateAdditionChecker.checkExceptionThrownAfterAction();
+
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(containsString("State addition is not allowed when state machine is active"));
+
+		stateMachineRegion.addState(State.NULL_STATE);
 	}
 	
 	@Test 
@@ -489,18 +493,10 @@ public class StateMachineTest {
 		
 		setInitialTransitionAndActivate(idleState);
 		
-		// prepare exception thrown checker
-		ExceptionThrownChecker illegalStateAdditionChecker = new ExceptionThrownChecker(
-				IllegalStateException.class, 
-				"Exception should have been thrown - illegal state addition.") {
-					@Override
-					protected void doAction() {
-						setInitialTransition(mock(State.class), null);
-					}
-		};
-		
-		// illegal action taken - exception thrown
-		illegalStateAdditionChecker.checkExceptionThrownAfterAction();
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(containsString("Initial transition setup is not allowed when state machine is active"));
+
+		setInitialTransition(mock(State.class), null);
 	}
 	
 	@Test 
@@ -510,18 +506,10 @@ public class StateMachineTest {
 		
 		setInitialTransitionAndActivate(idleState);
 		
-		// prepare exception thrown checker
-		ExceptionThrownChecker illegalTransitionAdditionChecker = new ExceptionThrownChecker(
-				IllegalStateException.class, 
-				"Exception should have been thrown - illegal transition addition.") {
-					@Override
-					protected void doAction() {
-						addTransition(idleState, mock(State.class), OnEvent.class);
-					}
-		};
-		
-		// illegal action taken - exception thrown
-		illegalTransitionAdditionChecker.checkExceptionThrownAfterAction();
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(containsString("Transition addition is not allowed when state machine is active"));
+
+		addTransition(idleState, mock(State.class), OnEvent.class);
 	}
 
 	@Test 
@@ -530,19 +518,11 @@ public class StateMachineTest {
 		addState(new ActiveState("Active"));
 		
 		setInitialTransitionAndActivate(idleState);
-		
-		// prepare exception thrown checker
-		ExceptionThrownChecker illegalTransitionAdditionChecker = new ExceptionThrownChecker(
-				IllegalStateException.class, 
-				"Exception should have been thrown - illegal region addition.") {
-					@Override
-					protected void doAction() {
-						stateMachine.addRegion(new RegionStateMachine(stateMachine));
-					}
-		};
-		
-		// illegal action taken - exception thrown
-		illegalTransitionAdditionChecker.checkExceptionThrownAfterAction();
+
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(containsString("Region addition is not allowed when state machine is active"));
+
+		stateMachine.addRegion(new RegionStateMachine(stateMachine));
 	}
 	
 	@Test 
@@ -552,18 +532,10 @@ public class StateMachineTest {
 		
 		setInitialTransitionAndActivate(idleState);
 		
-		// prepare exception thrown checker
-		ExceptionThrownChecker illegalDoubleActivationChecker = new ExceptionThrownChecker(
-				IllegalStateException.class, 
-				"Exception should have been thrown - illegal double activation.") {
-					@Override
-					protected void doAction() {
-						stateMachine.activate();
-					}
-		};
-		
-		// illegal action taken - exception thrown
-		illegalDoubleActivationChecker.checkExceptionThrownAfterAction();
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(containsString("Already active"));
+
+		stateMachine.activate();
 	}
 	
 	@Test 
@@ -573,19 +545,11 @@ public class StateMachineTest {
 		
 		setInitialTransitionAndActivate(idleState);
 		stateMachine.deactivate();
-		
-		// prepare exception thrown checker
-		ExceptionThrownChecker illegalDoubleActivationChecker = new ExceptionThrownChecker(
-				IllegalStateException.class, 
-				"Exception should have been thrown - illegal double deactivation.") {
-					@Override
-					protected void doAction() {
-						stateMachine.deactivate();
-					}
-		};
-		
-		// illegal action taken - exception thrown
-		illegalDoubleActivationChecker.checkExceptionThrownAfterAction();
+
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(containsString("Already inactive"));
+
+		stateMachine.deactivate();
 	}
 	
 	@Test 
@@ -593,37 +557,21 @@ public class StateMachineTest {
 		addState(new IdleState("Idle"));
 		addState(new ActiveState("Active"));
 		
-		// prepare exception thrown checker
-		ExceptionThrownChecker illegalTransitionAdditionChecker = new ExceptionThrownChecker(
-				IllegalStateException.class, 
-				"Exception should have been thrown - illegal event processing.") {
-					@Override
-					protected void doAction() {
-						stateMachine.processEvent();
-					}
-		};
-		
-		// illegal action taken - exception thrown
-		illegalTransitionAdditionChecker.checkExceptionThrownAfterAction();
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(containsString("Event processing is not allowed when state machine is inactive"));
+
+		stateMachine.processEvent();
 	}
 	
 	@Test 
 	public void illegalActiveStateBeforeActivationTest() {
 		addState(new IdleState("Idle"));
 		addState(new ActiveState("Active"));
-		
-		// prepare exception thrown checker
-		ExceptionThrownChecker illegalTransitionAdditionChecker = new ExceptionThrownChecker(
-				IllegalStateException.class, 
-				"Exception should have been thrown - illegal active state read.") {
-					@Override
-					protected void doAction() {
-						stateMachineRegion.activeState();
-					}
-		};
-		
-		// illegal action taken - exception thrown
-		illegalTransitionAdditionChecker.checkExceptionThrownAfterAction();
+
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(containsString("State machine is inactive"));
+
+		stateMachineRegion.activeState();
 	}
 	
 
@@ -632,17 +580,10 @@ public class StateMachineTest {
 		addState(new IdleState("Idle"));
 		addState(new ActiveState("Active"));
 		
-		// prepare exception thrown checker for illegal dispatch
-		ExceptionThrownChecker illegalDispatchChecker = new ExceptionThrownChecker(
-				IllegalStateException.class, 
-				"Exception should have been thrown - illegal event dispatch.") {
-					@Override
-					protected void doAction() {
-						stateMachine.dispatchEvent(new OnEvent());
-					}
-		};
-		// illegal action taken - exception thrown
-		illegalDispatchChecker.checkExceptionThrownAfterAction();
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(containsString("Event dispatching is not allowed when state machine is inactive"));
+
+		stateMachine.dispatchEvent(new OnEvent());
 	}
 	
 	@Test
@@ -650,17 +591,10 @@ public class StateMachineTest {
 		addState(new IdleState("Idle"));
 		addState(new ActiveState("Active"));
 		
-		// prepare exception thrown checker for illegal internal dispatch
-		ExceptionThrownChecker illegalInternalDispatchChecker = new ExceptionThrownChecker(
-				IllegalStateException.class, 
-				"Exception should have been thrown - illegal internal event dispatch.") {
-					@Override
-					protected void doAction() {
-						stateMachine.dispatchInternalEvent(new OnEvent());
-					}
-		};
-		// illegal action taken - exception thrown
-		illegalInternalDispatchChecker.checkExceptionThrownAfterAction();
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(containsString("Event dispatching is not allowed when state machine is inactive"));
+
+		stateMachine.dispatchInternalEvent(new OnEvent());
 	}
 	
 	@Test
@@ -1048,18 +982,11 @@ public class StateMachineTest {
 		dispatchThenProcessEventAndCheckActiveState(new TaskAccomplishedEvent(), waitForTaskState);
 		assertTrue(node3State.isBusy());		
 		
-		
-		// prepare exception thrown checker for illegal choice state (all guards false)
-		ExceptionThrownChecker illegalAllChoiceStateGuardsFalseChecker = new ExceptionThrownChecker(
-				IllegalStateException.class, 
-				"Exception should have been thrown - all guards of choice state evaluate to false.") {
-					@Override
-					protected void doAction() {
-						dispatchThenProcessEventAndCheckActiveState(new TaskReceivedEvent(), node1State);
-					}
-		};
-		// illegal action taken - exception thrown
-		illegalAllChoiceStateGuardsFalseChecker.checkExceptionThrownAfterAction();
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(containsString("Ill formed state machine"));
+		exception.expectMessage(containsString("choice state must have at least one guard evaluating to true"));
+
+		dispatchThenProcessEventAndCheckActiveState(new TaskReceivedEvent(), node1State);
 	}
 	
 	private State addSubstate(Region owningRegion, State substate) {
