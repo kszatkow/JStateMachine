@@ -7,7 +7,8 @@ import org.junit.runners.Suite;
 
 @Suite.SuiteClasses({
    StateMachineTest.class,
-   SimpleStateCompletionTransitionTest.class
+   SimpleStateCompletionTransitionTest.class,
+   TransitionEffectStateMachineTest.class
 })
 public class StateMachineTestSuite {
 	// empty on purpose

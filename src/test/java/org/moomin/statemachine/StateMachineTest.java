@@ -37,9 +37,6 @@ import org.moomin.statemachine.oddeven.ZeroNumberGuard;
 import org.moomin.statemachine.oddeven.ZeroState;
 import org.moomin.statemachine.onoff.OffEvent;
 import org.moomin.statemachine.onoff.OnEvent;
-import org.moomin.statemachine.onoff.Switch;
-import org.moomin.statemachine.onoff.TurnOffEffect;
-import org.moomin.statemachine.onoff.TurnOnEffect;
 import org.moomin.statemachine.phone.ConnectEvent;
 import org.moomin.statemachine.phone.ConnectingState;
 import org.moomin.statemachine.phone.DialingFinished;
@@ -237,34 +234,6 @@ public class StateMachineTest extends StateMachineTestBase {
 		dispatchThenProcessEventAndCheckActiveState(new EvenNumberEvent() , evenState);
 		// even -> odd
 		dispatchThenProcessEventAndCheckActiveState(new OddNumberEvent() , oddState);
-	}
-	
-	@Test
-	public void transitionEffectTest() {
-		State offState = addState(spy(State.class));
-		State onState = addState(spy(State.class));
-		
-		// use two different transition constructors on purpose
-		Switch offOnSwitch = new Switch();
-		TurnOnEffect turnOnEffect = new TurnOnEffect(offOnSwitch);
-		addTransition(offState, onState, OnEvent.class, turnOnEffect);
-		TurnOffEffect turnOffEffect = new TurnOffEffect(offOnSwitch);
-		addTransition(onState, offState, Collections.singletonList(OffEvent.class), turnOffEffect);
-				
-		setInitialTransitionAndActivate(offState);	
-		assertEquals(false, offOnSwitch.isOn());
-		
-		// turn off
-		dispatchThenProcessEventAndCheckActiveState(new OffEvent(), offState);
-		assertEquals(false, offOnSwitch.isOn());
-		
-		// turn on
-		dispatchThenProcessEventAndCheckActiveState(new OnEvent(), onState);
-		assertEquals(true, offOnSwitch.isOn());
-
-		// turn off
-		dispatchThenProcessEventAndCheckActiveState(new OffEvent(), offState);
-		assertEquals(false, offOnSwitch.isOn());
 	}
 	
 	@Test
