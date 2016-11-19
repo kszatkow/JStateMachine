@@ -10,14 +10,11 @@ import org.junit.Test;
 import org.moomin.statemachine.oddeven.CheckParityJunctionState;
 import org.moomin.statemachine.oddeven.EvenNumberCompeltionGuard;
 import org.moomin.statemachine.oddeven.EvenNumberGuard;
-import org.moomin.statemachine.oddeven.EvenState;
 import org.moomin.statemachine.oddeven.FeedNumberEvent;
 import org.moomin.statemachine.oddeven.OddNumberCompletionGuard;
 import org.moomin.statemachine.oddeven.OddNumberGuard;
-import org.moomin.statemachine.oddeven.OddState;
 import org.moomin.statemachine.oddeven.ZeroNumberCompletionGuard;
 import org.moomin.statemachine.oddeven.ZeroNumberGuard;
-import org.moomin.statemachine.oddeven.ZeroState;
 
 public class JunctionStateStateMachineTest extends StateMachineTestBase {
 
@@ -55,9 +52,9 @@ public class JunctionStateStateMachineTest extends StateMachineTestBase {
 	}
 	
 	private void addNonJunctionStates() {
-		zeroState = addState(new ZeroState("Zero"));
-		oddState = addState(new OddState("Odd"));
-		evenState = addState(new EvenState("Even"));
+		zeroState = addState(spy(State.class));
+		oddState = addState(spy(State.class));
+		evenState = addState(spy(State.class));
 	}
 	
 	@Override

@@ -22,13 +22,10 @@ import org.moomin.statemachine.idleactive.KeyWakeupEvent;
 import org.moomin.statemachine.idleactive.MouseWakeupEvent;
 import org.moomin.statemachine.oddeven.EvenNumberGuard;
 import org.moomin.statemachine.oddeven.EvenNumberEvent;
-import org.moomin.statemachine.oddeven.EvenState;
 import org.moomin.statemachine.oddeven.FeedNumberEvent;
 import org.moomin.statemachine.oddeven.OddNumberGuard;
 import org.moomin.statemachine.oddeven.OddNumberEvent;
-import org.moomin.statemachine.oddeven.OddState;
 import org.moomin.statemachine.oddeven.ZeroNumberEvent;
-import org.moomin.statemachine.oddeven.ZeroState;
 import org.moomin.statemachine.onoff.OffEvent;
 import org.moomin.statemachine.onoff.OnEvent;
 import org.moomin.statemachine.phone.ConnectEvent;
@@ -130,8 +127,8 @@ public class StateMachineTest extends StateMachineTestBase {
 	
 	@Test
 	public void transitionsWithGuardsTest() {
-		State oddState = addState(new OddState("Odd"));
-		State evenState = addState(new EvenState("Even"));
+		State oddState = addState(spy(State.class));
+		State evenState = addState(spy(State.class));
 		
 		// use two different transition constructors on purpose
 		addTransition(oddState, evenState, FeedNumberEvent.class, new EvenNumberGuard());
@@ -155,9 +152,9 @@ public class StateMachineTest extends StateMachineTestBase {
 
 	@Test
 	public void multipleTransitionsFromOneStateTest() {
-		State zeroState = addState(new ZeroState("Zero"));
-		State oddState = addState(new OddState("Odd"));
-		State evenState = addState(new EvenState("Even"));
+		State zeroState = addState(spy(State.class));
+		State oddState = addState(spy(State.class));
+		State evenState = addState(spy(State.class));
 		
 		addTransition(zeroState, oddState, OddNumberEvent.class);
 		addTransition(zeroState, evenState, EvenNumberEvent.class);
