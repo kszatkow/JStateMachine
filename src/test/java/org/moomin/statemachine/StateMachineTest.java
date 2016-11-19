@@ -58,35 +58,6 @@ import org.moomin.statemachine.taskrouter.WaitForTaskState;
 public class StateMachineTest extends StateMachineTestBase {
 
 	@Test
-	public void activateDeactivateTest() {
-		State offState = addState(spy(State.class));
-		State onState = addState(spy(State.class));
-		
-		addTransition(offState, onState, OnEvent.class);
-		addTransition(onState, offState, OffEvent.class);
-				
-		assertFalse(stateMachine.isActive());
-		setInitialTransitionAndActivate(offState);
-		assertTrue(stateMachine.isActive());
-		
-		// off -> on
-		dispatchThenProcessEventAndCheckActiveState(new OnEvent() , onState);
-		assertTrue(stateMachine.isActive());
-		
-		// deactivate - machine goes into default state
-		stateMachine.deactivate();
-		assertFalse(stateMachine.isActive());
-		
-		// activate again
-		stateMachine.activate();
-		assertTrue(stateMachine.isActive());
-		assertEquals(offState, stateMachineRegion.activeState());
-		
-		// off -> on
-		dispatchThenProcessEventAndCheckActiveState(new OnEvent() , onState);
-	}
-	
-	@Test
 	public void initialPseudostateTest() {
 		State normalState = addState(mock(State.class));
 		
