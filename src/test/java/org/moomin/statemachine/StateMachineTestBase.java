@@ -14,13 +14,9 @@ public class StateMachineTestBase {
 
 	protected StateMachine stateMachine;
 	protected Region stateMachineRegion;
+	
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
-
-	protected static State addSubstate(Region owningRegion, State substate) {
-		owningRegion.addState(substate);
-		return substate;
-	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -35,10 +31,11 @@ public class StateMachineTestBase {
 		stateMachineRegion = null;
 	}
 
-	public StateMachineTestBase() {
-		super();
+	protected static State addSubstate(Region owningRegion, State substate) {
+		owningRegion.addState(substate);
+		return substate;
 	}
-
+	
 	protected State addState(State state) {
 		stateMachineRegion.addState(state);
 		return state;

@@ -6,7 +6,8 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 
 @Suite.SuiteClasses({
-   StateMachineTest.class
+   StateMachineTest.class,
+   SimpleStateCompletionTransitionTest.class
 })
 public class StateMachineTestSuite {
 	// empty on purpose

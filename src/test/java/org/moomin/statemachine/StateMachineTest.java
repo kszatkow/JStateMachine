@@ -36,10 +36,7 @@ import org.moomin.statemachine.oddeven.ZeroNumberEvent;
 import org.moomin.statemachine.oddeven.ZeroNumberGuard;
 import org.moomin.statemachine.oddeven.ZeroState;
 import org.moomin.statemachine.onoff.OffEvent;
-import org.moomin.statemachine.onoff.OffProxyState;
 import org.moomin.statemachine.onoff.OnEvent;
-import org.moomin.statemachine.onoff.OnOffTransitionGuard;
-import org.moomin.statemachine.onoff.OnProxyState;
 import org.moomin.statemachine.onoff.Switch;
 import org.moomin.statemachine.onoff.TurnOffEffect;
 import org.moomin.statemachine.onoff.TurnOnEffect;
@@ -179,60 +176,6 @@ public class StateMachineTest extends StateMachineTestBase {
 		dispatchThenProcessEventAndCheckActiveState(new OnEvent() , onState);
 	}
 
-	@Test
-	public void simpleStateCompletionTransitionWithoutGuardTest() {
-		State offState = addState(spy(State.class));
-		State onProxyState = addState(new OnProxyState("OnProxy"));
-		State onState = addState(spy(State.class));
-		State offProxyState = addState(new OffProxyState("OnProxy"));
-		
-		addTransition(offState, onProxyState, OnEvent.class);
-		addCompletionTransition(onProxyState, onState);
-		addTransition(onState, offProxyState, OffEvent.class);
-		TransitionEffect effectMock = mock(TransitionEffect.class);
-		addCompletionTransition(offProxyState, offState, effectMock);
-				
-		setInitialTransitionAndActivate(offState);
-	
-		// off -> on
-		dispatchThenProcessEventAndCheckActiveState(new OnEvent() , onState);
-		// on -> off
-		verify(effectMock, never()).execute();
-		dispatchThenProcessEventAndCheckActiveState(new OffEvent() , offState);
-		verify(effectMock).execute();
-	}
-	
-	@Test
-	public void simpleStateCompletionTransitionWithGuardTest() {
-		State offState = addState(spy(State.class));
-		State onProxyState = addState(new OnProxyState("OnProxy"));
-		State onState = addState(spy(State.class));
-		State offProxyState = addState(new OffProxyState("OnProxy"));
-		
-		OnOffTransitionGuard guard =  new OnOffTransitionGuard();
-		addTransition(offState, onProxyState, OnEvent.class);
-		addCompletionTransition(onProxyState, onState, guard);
-		addTransition(onState, offProxyState, OffEvent.class);
-		TransitionEffect effectMock = mock(TransitionEffect.class);
-		addCompletionTransition(offProxyState, offState, guard, effectMock);
-				
-		setInitialTransitionAndActivate(offState);
-	
-		// off -> on unsuccessful - guard evaluates to false
-		dispatchThenProcessEventAndCheckActiveState(new OnEvent() , onProxyState);
-		// off -> on
-		guard.evaluateToTrue();
-		dispatchThenProcessEventAndCheckActiveState(new CompletionEvent(onProxyState) , onState);
-				
-		// on -> off unsuccessful - guard evaluates to false
-		guard.evaluateToFalse();
-		dispatchThenProcessEventAndCheckActiveState(new OffEvent() , offProxyState);
-		verify(effectMock, never()).execute();
-		// on -> off
-		guard.evaluateToTrue();
-		dispatchThenProcessEventAndCheckActiveState(new CompletionEvent(offProxyState) , offState);
-		verify(effectMock).execute();	
-	}
 	
 	@Test
 	public void transitionsWithGuardsTest() {
