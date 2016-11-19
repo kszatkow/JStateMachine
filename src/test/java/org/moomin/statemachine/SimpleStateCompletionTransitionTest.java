@@ -17,19 +17,27 @@ public class SimpleStateCompletionTransitionTest extends StateMachineTestBase {
 	private State onProxyState;
 	private State offProxyState;
 
+	@Override
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		super.setUp();
 		
+		addStates();
+		addNonCompletionTransitions();
+	}
+
+	private void addStates() {
 		offState = addState(spy(State.class));
 		onState = addState(spy(State.class));
 		onProxyState = addState(spy(SimpleState.class));
 		offProxyState = addState(spy(SimpleState.class));
-		
+	}
+
+	private void addNonCompletionTransitions() {
 		addTransition(offState, onProxyState, OnEvent.class);
 		addTransition(onState, offProxyState, OffEvent.class);
 	}
-	
+
 	@Test
 	public void simpleStateCompletionTransitionWithoutGuardTest() {
 		// off to on through proxy state

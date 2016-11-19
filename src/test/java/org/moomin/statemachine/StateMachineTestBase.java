@@ -19,7 +19,7 @@ public class StateMachineTestBase {
 	public ExpectedException exception = ExpectedException.none();
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		stateMachine = new StateMachine();
 		stateMachineRegion = new RegionStateMachine(stateMachine);
 		stateMachine.addRegion(stateMachineRegion);

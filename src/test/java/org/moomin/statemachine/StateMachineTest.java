@@ -21,19 +21,13 @@ import org.moomin.statemachine.idleactive.IdleTimeoutEvent;
 import org.moomin.statemachine.idleactive.KeyWakeupEvent;
 import org.moomin.statemachine.idleactive.MouseWakeupEvent;
 import org.moomin.statemachine.oddeven.EvenNumberGuard;
-import org.moomin.statemachine.oddeven.EvenNumberCompeltionGuard;
 import org.moomin.statemachine.oddeven.EvenNumberEvent;
 import org.moomin.statemachine.oddeven.EvenState;
 import org.moomin.statemachine.oddeven.FeedNumberEvent;
-import org.moomin.statemachine.oddeven.OddEvenStateMachineJunctionStateTest;
-import org.moomin.statemachine.oddeven.OddNumberCompletionGuard;
 import org.moomin.statemachine.oddeven.OddNumberGuard;
 import org.moomin.statemachine.oddeven.OddNumberEvent;
 import org.moomin.statemachine.oddeven.OddState;
-import org.moomin.statemachine.oddeven.CheckParityJunctionState;
-import org.moomin.statemachine.oddeven.ZeroNumberCompletionGuard;
 import org.moomin.statemachine.oddeven.ZeroNumberEvent;
-import org.moomin.statemachine.oddeven.ZeroNumberGuard;
 import org.moomin.statemachine.oddeven.ZeroState;
 import org.moomin.statemachine.onoff.OffEvent;
 import org.moomin.statemachine.onoff.OnEvent;
@@ -66,46 +60,6 @@ import org.moomin.statemachine.taskrouter.WaitForTaskState;
 @RunWith(MockitoJUnitRunner.class)
 public class StateMachineTest extends StateMachineTestBase {
 
-	private abstract class JunctionStateTestTemplate extends OddEvenStateMachineJunctionStateTest {
-
-		protected JunctionState junctionState;
-		
-		protected JunctionStateTestTemplate(JunctionState junctionState) {
-			this.junctionState = junctionState;
-		}
-		
-		@Override
-		protected void addStates() {
-			zeroState = addState(new ZeroState("Zero"));
-			oddState = addState(new OddState("Odd"));
-			evenState = addState(new EvenState("Even"));
-			checkParity = addState(junctionState);
-		}
-
-		@Override
-		protected void addJunctionIncomingTransitions() {
-			// various NoGuardTransition constructors used to improve code coverage
-			addTransition(new NoGuardTransition(zeroState, checkParity, 
-					Collections.singletonList(FeedNumberEvent.class)));
-			addTransition(new NoGuardTransition(oddState, checkParity, 
-					Collections.singletonList(FeedNumberEvent.class), 
-					mock(TransitionEffect.class)));
-			addTransition(new NoGuardTransition(evenState, checkParity, FeedNumberEvent.class));
-		}
-
-		@Override
-		protected void setInitialTransitionAndActivate() {
-			StateMachineTest.this.setInitialTransitionAndActivate(zeroState);
-		}
-		
-		@Override
-		protected void dispatchProcessEventAndCheckActiveState(FeedNumberEvent feedNumberEvent,
-				State expectedActiveState) {
-			dispatchTwiceThenProcessAndCheckActiveState(feedNumberEvent, expectedActiveState);
-		}
-	}
-
-	
 	@Test
 	public void activateDeactivateTest() {
 		State offState = addState(spy(State.class));
@@ -236,6 +190,7 @@ public class StateMachineTest extends StateMachineTestBase {
 		dispatchThenProcessEventAndCheckActiveState(new OddNumberEvent() , oddState);
 	}
 	
+		
 	@Test
 	public void transitionWithMultipleTriggersTest() {
 		State idleState = addState(new IdleState("Idle"));
@@ -523,92 +478,6 @@ public class StateMachineTest extends StateMachineTestBase {
 		// transition back to idle state - onEntry of target state executed
 		dispatchThenProcessEventAndCheckActiveState(new IdleTimeoutEvent() , idleState);
 		assertTrue(idleState.hasOnEntryBeenExecuted());
-	}
-	
-	@Test
-	public void junctionStateWithoutElseTransitionTest() {
-		JunctionStateTestTemplate testJunctionWithoutElseTransition = 
-				new JunctionStateTestTemplate(new NoBehaviourJunctionState("CheckParity")) {
-			@Override
-			protected void addJunctionOutgoingTransitions() {
-				addTransition(checkParity, evenState, FeedNumberEvent.class, new EvenNumberGuard());
-				addTransition(checkParity, oddState, FeedNumberEvent.class, new OddNumberGuard());
-				addTransition(checkParity, zeroState, FeedNumberEvent.class, new ZeroNumberGuard());
-			}
-		};
-		
-		testJunctionWithoutElseTransition.test();
-	}
-
-	@Test
-	public void junctionStateWithElseTransitionTest() {
-		JunctionState junctionState = new NoBehaviourJunctionState("CheckParity");
-		TransitionEffect elseTransitionEffectMock = mock(TransitionEffect.class);
-		JunctionStateTestTemplate testJunctionWithElseTransition = 
-				new JunctionStateTestTemplate(junctionState) {
-			@Override
-			protected void addJunctionOutgoingTransitions() {
-				addTransition(checkParity, evenState, FeedNumberEvent.class, new EvenNumberGuard());
-				addTransition(checkParity, oddState, FeedNumberEvent.class, new OddNumberGuard());
-				junctionState.setElseTrasition(new NoGuardTransition(checkParity, zeroState, 
-						FeedNumberEvent.class, elseTransitionEffectMock));
-			}
-		};
-		
-		verify(elseTransitionEffectMock, never()).execute();
-		testJunctionWithElseTransition.test();
-		verify(elseTransitionEffectMock, times(3)).execute();
-	}
-	
-	@Test
-	public void junctionStateOutgoingCompletionTransitionsWithoutElseTransitionTest() {
-		CheckParityJunctionState junctionState = new CheckParityJunctionState("CheckParity");
-		JunctionStateTestTemplate testJunctionOutgoingCompletionTransitionsWithoutElseTransition = 
-				new JunctionStateTestTemplate(junctionState) {
-			
-			@Override
-			protected void addJunctionOutgoingTransitions() {
-				addTransition(checkParity, evenState, CompletionEvent.class, 
-						new EvenNumberCompeltionGuard());
-				addTransition(checkParity, oddState, CompletionEvent.class, 
-						new OddNumberCompletionGuard());
-				addTransition(checkParity, zeroState, CompletionEvent.class, 
-						new ZeroNumberCompletionGuard());
-			}
-	
-			@Override
-			protected void dispatchProcessEventAndCheckActiveState(FeedNumberEvent feedNumberEvent,
-					State expectedActiveState) {
-				dispatchThenProcessEventAndCheckActiveState(feedNumberEvent, expectedActiveState);
-			}
-		};
-		
-		testJunctionOutgoingCompletionTransitionsWithoutElseTransition.test();
-	}
-	
-	@Test
-	public void junctionStateOutgoingCompletionTransitionsWithElseTransitionTest() {
-		CheckParityJunctionState junctionState = new CheckParityJunctionState("CheckParity");
-		JunctionStateTestTemplate testJunctionWithElseTransitionAndOutgoingCompletionTransitions = 
-				new JunctionStateTestTemplate(junctionState) {
-			
-			@Override
-			protected void addJunctionOutgoingTransitions() {
-				addTransition(checkParity, evenState, CompletionEvent.class, 
-						new EvenNumberCompeltionGuard());
-				addTransition(checkParity, oddState, CompletionEvent.class, 
-						new OddNumberCompletionGuard());
-				junctionState.setElseTrasition(new NoGuardTransition(checkParity, zeroState, CompletionEvent.class));
-			}
-	
-			@Override
-			protected void dispatchProcessEventAndCheckActiveState(FeedNumberEvent feedNumberEvent,
-					State expectedActiveState) {
-				dispatchThenProcessEventAndCheckActiveState(feedNumberEvent, expectedActiveState);
-			}
-		};
-		
-		testJunctionWithElseTransitionAndOutgoingCompletionTransitions.test();
 	}
 	
 	@Test
