@@ -7,6 +7,8 @@ import java.util.Collections;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.moomin.statemachine.oddeven.CheckParityJunctionState;
 import org.moomin.statemachine.oddeven.EvenNumberCompeltionGuard;
 import org.moomin.statemachine.oddeven.EvenNumberGuard;
@@ -16,6 +18,7 @@ import org.moomin.statemachine.oddeven.OddNumberGuard;
 import org.moomin.statemachine.oddeven.ZeroNumberCompletionGuard;
 import org.moomin.statemachine.oddeven.ZeroNumberGuard;
 
+@RunWith(MockitoJUnitRunner.class)
 public class JunctionStateStateMachineTest extends StateMachineTestBase {
 
 	private static interface EventDispatcher {

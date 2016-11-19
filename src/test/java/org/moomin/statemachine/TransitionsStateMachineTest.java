@@ -1,5 +1,6 @@
 package org.moomin.statemachine;
 
+import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -11,6 +12,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.moomin.statemachine.idleactive.IdleTimeoutEvent;
 import org.moomin.statemachine.idleactive.KeyWakeupEvent;
 import org.moomin.statemachine.idleactive.MouseWakeupEvent;
@@ -23,6 +26,7 @@ import org.moomin.statemachine.oddeven.ZeroNumberEvent;
 import org.moomin.statemachine.onoff.OffEvent;
 import org.moomin.statemachine.onoff.OnEvent;
 
+@RunWith(MockitoJUnitRunner.class)
 public class TransitionsStateMachineTest extends StateMachineTestBase {
 
 	@Test
@@ -167,6 +171,90 @@ public class TransitionsStateMachineTest extends StateMachineTestBase {
 		dispatchThenProcessEventAndCheckActiveState(new IdleTimeoutEvent(), idleState);	
 		// no transition - unhandled event
 		dispatchThenProcessEventAndCheckActiveState(new UnhandledEvent(), idleState);
+	}
+	
+	@Test
+	public void illegalSourceAndTargetStateTransitionTest() {
+		// legal states
+		State idleState = addState(mock(State.class));
+		
+		// illegal states
+		State offState = mock(State.class);
+		State onState = mock(State.class);
+		
+		setInitialTransition(idleState, null);
+		
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(containsString("Invalid source or destination state"));
+		
+		// illegal transition - both states invalid
+		stateMachineRegion.addTransition(new Transition(offState, onState, OnEvent.class));
+	}
+
+	@Test
+	public void illegalSourceStateTransitionTest() {
+		// legal states
+		State idleState = addState(mock(State.class));
+		State activeState = addState(mock(State.class));
+		
+		// illegal states
+		State offState = mock(State.class);
+		
+		setInitialTransition(idleState, null);
+		
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(containsString("Invalid source or destination state"));
+		
+		// illegal transition - source state invalid
+		stateMachineRegion.addTransition(new Transition(offState, activeState, OnEvent.class));
+	}
+	
+	@Test
+	public void illegalDestinationStateTransitionTest() {
+		// legal states
+		State idleState = addState(mock(State.class));
+		
+		// illegal states
+		State onState = mock(State.class);
+		
+		setInitialTransition(idleState, null);
+		
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(containsString("Invalid source or destination state"));
+		
+		// illegal transition - target state invalid
+		stateMachineRegion.addTransition(new Transition(idleState, onState, OffEvent.class));
+	}
+
+	@Test
+	public void transitionEffectTest() {
+		State offState = addState(spy(State.class));
+		State onState = addState(spy(State.class));
+		
+		// use two different transition constructors on purpose
+		TransitionEffect turnOnEffect = mock(TransitionEffect.class);
+		addTransition(offState, onState, OnEvent.class, turnOnEffect);
+		TransitionEffect turnOffEffect = mock(TransitionEffect.class);
+		addTransition(onState, offState, Collections.singletonList(OffEvent.class), turnOffEffect);
+				
+		setInitialTransitionAndActivate(offState);
+		verify(turnOnEffect, never()).execute();
+		verify(turnOffEffect, never()).execute();
+		
+		// turn off - not handled, already off
+		dispatchThenProcessEventAndCheckActiveState(new OffEvent(), offState);
+		verify(turnOnEffect, never()).execute();
+		verify(turnOffEffect, never()).execute();
+		
+		// turn on
+		dispatchThenProcessEventAndCheckActiveState(new OnEvent(), onState);
+		verify(turnOnEffect).execute();
+		verify(turnOffEffect, never()).execute();
+
+		// turn off
+		dispatchThenProcessEventAndCheckActiveState(new OffEvent(), offState);
+		verify(turnOnEffect).execute();
+		verify(turnOffEffect).execute();
 	}
 	
 }

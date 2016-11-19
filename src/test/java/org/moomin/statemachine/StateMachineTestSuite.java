@@ -8,10 +8,12 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
    StateMachineTest.class,
    SimpleStateCompletionTransitionTest.class,
-   TransitionEffectStateMachineTest.class,
+   TransitionsStateMachineTest.class,
    JunctionStateStateMachineTest.class,
-   ActivateDeactivateStateMachineTest.class,
-   TransitionsStateMachineTest.class
+   ActivatableStateMachineTest.class,
+   StateMachineCreationTest.class,
+   EventHandlingStateMachineTest.class,
+   StateBehaviourStateMachineTest.class
 })
 public class StateMachineTestSuite {
 	// empty on purpose
