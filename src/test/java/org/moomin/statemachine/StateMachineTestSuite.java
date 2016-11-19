@@ -10,7 +10,8 @@ import org.junit.runners.Suite;
    SimpleStateCompletionTransitionTest.class,
    TransitionEffectStateMachineTest.class,
    JunctionStateStateMachineTest.class,
-   ActivateDeactivateStateMachineTest.class
+   ActivateDeactivateStateMachineTest.class,
+   TransitionsStateMachineTest.class
 })
 public class StateMachineTestSuite {
 	// empty on purpose

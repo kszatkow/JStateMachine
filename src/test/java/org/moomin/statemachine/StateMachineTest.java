@@ -5,10 +5,7 @@ import static org.mockito.Mockito.*;
 import static org.hamcrest.core.StringContains.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,12 +17,6 @@ import org.moomin.statemachine.idleactive.IdleStateWithOnEntryAndOnExitBehaviour
 import org.moomin.statemachine.idleactive.IdleTimeoutEvent;
 import org.moomin.statemachine.idleactive.KeyWakeupEvent;
 import org.moomin.statemachine.idleactive.MouseWakeupEvent;
-import org.moomin.statemachine.oddeven.EvenNumberGuard;
-import org.moomin.statemachine.oddeven.EvenNumberEvent;
-import org.moomin.statemachine.oddeven.FeedNumberEvent;
-import org.moomin.statemachine.oddeven.OddNumberGuard;
-import org.moomin.statemachine.oddeven.OddNumberEvent;
-import org.moomin.statemachine.oddeven.ZeroNumberEvent;
 import org.moomin.statemachine.onoff.OffEvent;
 import org.moomin.statemachine.onoff.OnEvent;
 import org.moomin.statemachine.phone.ConnectEvent;
@@ -57,150 +48,6 @@ import org.moomin.statemachine.taskrouter.WaitForTaskState;
 @RunWith(MockitoJUnitRunner.class)
 public class StateMachineTest extends StateMachineTestBase {
 
-	@Test
-	public void initialPseudostateTest() {
-		State normalState = addState(mock(State.class));
-		
-		TransitionEffect initialTransitionEffectMock = mock(TransitionEffect.class);
-		setInitialTransition(normalState, initialTransitionEffectMock);
-		
-		verify(initialTransitionEffectMock, never()).execute();
-		
-		stateMachine.activate();
-		assertSame(normalState, stateMachineRegion.activeState());
-		verify(initialTransitionEffectMock).execute();
-	}
-
-	@Test
-	public void transitionsWithoutGuardsTest() {
-		State offState = addState(spy(State.class));
-		State onState = addState(spy(State.class));
-		
-		addTransition(offState, onState, OnEvent.class);
-		addTransition(onState, offState, OffEvent.class);
-				
-		setInitialTransitionAndActivate(offState);
-	
-		// off -> on
-		dispatchThenProcessEventAndCheckActiveState(new OnEvent() , onState);
-		// no transition - unhandled event
-		dispatchThenProcessEventAndCheckActiveState(new UnhandledEvent() , onState);
-		// on -> off
-		dispatchThenProcessEventAndCheckActiveState(new OffEvent() , offState);
-		// off -> off
-		dispatchThenProcessEventAndCheckActiveState(new OffEvent() , offState);
-		// no transition - unhandled event
-		dispatchThenProcessEventAndCheckActiveState(new UnhandledEvent() , offState);
-		// off -> on
-		dispatchThenProcessEventAndCheckActiveState(new OnEvent() , onState);
-	}
-
-	
-	@Test
-	public void transitionsWithGuardsTest() {
-		State oddState = addState(spy(State.class));
-		State evenState = addState(spy(State.class));
-		
-		// use two different transition constructors on purpose
-		addTransition(oddState, evenState, FeedNumberEvent.class, new EvenNumberGuard());
-		addTransition(evenState, oddState, Collections.singleton(FeedNumberEvent.class), new OddNumberGuard());
-				
-		setInitialTransitionAndActivate(oddState);
-		
-		// odd -> odd
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(11) , oddState);
-		// no transition - unhandled event
-		dispatchThenProcessEventAndCheckActiveState(new UnhandledEvent() , oddState);
-		// odd -> even
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(4) , evenState);
-		// even -> even
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(10) , evenState);
-		// no transition - unhandled event
-		dispatchThenProcessEventAndCheckActiveState(new UnhandledEvent() , evenState);
-		// even -> odd
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(5) , oddState);
-	}
-
-	@Test
-	public void multipleTransitionsFromOneStateTest() {
-		State zeroState = addState(spy(State.class));
-		State oddState = addState(spy(State.class));
-		State evenState = addState(spy(State.class));
-		
-		addTransition(zeroState, oddState, OddNumberEvent.class);
-		addTransition(zeroState, evenState, EvenNumberEvent.class);
-		addTransition(oddState, evenState, EvenNumberEvent.class);
-		addTransition(oddState, zeroState, ZeroNumberEvent.class);
-		addTransition(evenState, oddState, OddNumberEvent.class);
-		addTransition(evenState, zeroState, ZeroNumberEvent.class);
-		
-		setInitialTransitionAndActivate(zeroState);
-	
-		// zero -> zero
-		dispatchThenProcessEventAndCheckActiveState(new ZeroNumberEvent() , zeroState);
-		// zero -> odd
-		dispatchThenProcessEventAndCheckActiveState(new OddNumberEvent() , oddState);
-		// odd -> odd
-		dispatchThenProcessEventAndCheckActiveState(new OddNumberEvent() , oddState);
-		// odd -> zero
-		dispatchThenProcessEventAndCheckActiveState(new ZeroNumberEvent() , zeroState);
-		// zero -> even
-		dispatchThenProcessEventAndCheckActiveState(new EvenNumberEvent() , evenState);
-		// even -> even
-		dispatchThenProcessEventAndCheckActiveState(new EvenNumberEvent() , evenState);
-		// even -> zero
-		dispatchThenProcessEventAndCheckActiveState(new ZeroNumberEvent() , zeroState);
-		// zero -> odd
-		dispatchThenProcessEventAndCheckActiveState(new OddNumberEvent() , oddState);
-		// odd -> even
-		dispatchThenProcessEventAndCheckActiveState(new EvenNumberEvent() , evenState);
-		// even -> odd
-		dispatchThenProcessEventAndCheckActiveState(new OddNumberEvent() , oddState);
-	}
-	
-		
-	@Test
-	public void transitionWithMultipleTriggersTest() {
-		State idleState = addState(new IdleState("Idle"));
-		State activeState = addState(new ActiveState("Active"));
-		
-		Set<Class<? extends Event>> triggerableBy = new HashSet<>();
-		triggerableBy.add(KeyWakeupEvent.class);
-		triggerableBy.add(MouseWakeupEvent.class);
-		addTransition(idleState, activeState, triggerableBy);
-		addTransition(activeState, idleState, IdleTimeoutEvent.class);
-				
-		setInitialTransitionAndActivate(idleState);	
-		
-		// idle -> idle
-		dispatchThenProcessEventAndCheckActiveState(new IdleTimeoutEvent(), idleState);		
-		// idle -> active (key event)
-		dispatchThenProcessEventAndCheckActiveState(new KeyWakeupEvent(), activeState);
-		// active -> idle
-		dispatchThenProcessEventAndCheckActiveState(new IdleTimeoutEvent(), idleState);	
-		// idle -> active (mouse event)
-		dispatchThenProcessEventAndCheckActiveState(new MouseWakeupEvent(), activeState);
-		// active -> idle
-		dispatchThenProcessEventAndCheckActiveState(new IdleTimeoutEvent(), idleState);	
-		// no transition - unhandled event
-		dispatchThenProcessEventAndCheckActiveState(new UnhandledEvent(), idleState);
-	}
-	
-	@Test
-	public void twoStatesNoTransitionTest() {
-		State idleState = addState(new IdleState("Idle"));
-		State activeState = addState(new ActiveState("Active"));
-		
-		addTransition(idleState, activeState, KeyWakeupEvent.class);
-		addTransition(activeState, idleState, IdleTimeoutEvent.class);
-		
-		setInitialTransitionAndActivate(idleState);	
-		
-		// no event dispatched - no transition
-		stateMachine.processEvent();
-		assertSame(idleState, stateMachineRegion.activeState());
-	}
-	
 	@Test
 	public void processUndispatchedEvent() {
 		State idleState = addState(new IdleState("Idle"));
