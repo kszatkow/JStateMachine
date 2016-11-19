@@ -21,6 +21,25 @@ import org.moomin.statemachine.oddeven.ZeroState;
 
 public class JunctionStateStateMachineTest extends StateMachineTestBase {
 
+	private static interface EventDispatcher {
+		public void dispatchAndAssertCurrentState(Event event, State expectedActiveState);
+	}
+	
+	private class SingleEventDispatcher implements EventDispatcher {
+		@Override
+		public void dispatchAndAssertCurrentState(Event event, State expectedActiveState) {
+			dispatchThenProcessEventAndCheckActiveState(event, expectedActiveState);
+		}
+	}
+	
+	private class DoubleEventDispatcher implements EventDispatcher {
+		@Override
+		public void dispatchAndAssertCurrentState(Event event, State expectedActiveState) {
+			dispatchTwiceThenProcessAndCheckActiveState(event, expectedActiveState);
+		}
+	}
+	
+	
 	private State zeroState;
 	private State oddState;
 	private State evenState;
@@ -60,7 +79,7 @@ public class JunctionStateStateMachineTest extends StateMachineTestBase {
 		
 		setInitialTransitionAndActivate();
 		
-		assertMachineWorking();
+		assertMachineWorking(new DoubleEventDispatcher());
 	}
 	
 
@@ -78,7 +97,7 @@ public class JunctionStateStateMachineTest extends StateMachineTestBase {
 		setInitialTransitionAndActivate();
 		
 		verify(elseTransitionEffectMock, never()).execute();
-		assertMachineWorking();
+		assertMachineWorking(new DoubleEventDispatcher());
 		verify(elseTransitionEffectMock, times(3)).execute();
 	}
 	
@@ -96,7 +115,7 @@ public class JunctionStateStateMachineTest extends StateMachineTestBase {
 		
 		setInitialTransitionAndActivate();
 		
-		assertMachineWorkingSingle();
+		assertMachineWorking(new SingleEventDispatcher());
 	}
 	
 	@Test
@@ -112,7 +131,7 @@ public class JunctionStateStateMachineTest extends StateMachineTestBase {
 	
 		setInitialTransitionAndActivate();
 		
-		assertMachineWorkingSingle();
+		assertMachineWorking(new SingleEventDispatcher());
 	}
 
 	private void addJunctionIncomingTransitions() {
@@ -129,49 +148,26 @@ public class JunctionStateStateMachineTest extends StateMachineTestBase {
 		setInitialTransitionAndActivate(zeroState);
 	}
 
-	private void assertMachineWorking() {
+	private void assertMachineWorking(EventDispatcher eventDispatcher) {
 		// zero -> zero
-		dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(0), zeroState);
+		eventDispatcher.dispatchAndAssertCurrentState(new FeedNumberEvent(0), zeroState);
 		// zero -> odd
-		dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(3) , oddState);
+		eventDispatcher.dispatchAndAssertCurrentState(new FeedNumberEvent(3) , oddState);
 		// odd -> odd
-		dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(5) , oddState);
+		eventDispatcher.dispatchAndAssertCurrentState(new FeedNumberEvent(5) , oddState);
 		// odd -> zero
-		dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(0) , zeroState);
+		eventDispatcher.dispatchAndAssertCurrentState(new FeedNumberEvent(0) , zeroState);
 		// zero -> even
-		dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(2) , evenState);
+		eventDispatcher.dispatchAndAssertCurrentState(new FeedNumberEvent(2) , evenState);
 		// even -> even
-		dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(12) , evenState);
+		eventDispatcher.dispatchAndAssertCurrentState(new FeedNumberEvent(12) , evenState);
 		// even -> zero
-		dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(0) , zeroState);
+		eventDispatcher.dispatchAndAssertCurrentState(new FeedNumberEvent(0) , zeroState);
 		// zero -> odd
-		dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(13) , oddState);
+		eventDispatcher.dispatchAndAssertCurrentState(new FeedNumberEvent(13) , oddState);
 		// odd -> even
-		dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(18) , evenState);
+		eventDispatcher.dispatchAndAssertCurrentState(new FeedNumberEvent(18) , evenState);
 		// even -> odd
-		dispatchTwiceThenProcessAndCheckActiveState(new FeedNumberEvent(15) , oddState);
-	}
-	
-	private void assertMachineWorkingSingle() {
-		// zero -> zero
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(0), zeroState);
-		// zero -> odd
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(3) , oddState);
-		// odd -> odd
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(5) , oddState);
-		// odd -> zero
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(0) , zeroState);
-		// zero -> even
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(2) , evenState);
-		// even -> even
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(12) , evenState);
-		// even -> zero
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(0) , zeroState);
-		// zero -> odd
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(13) , oddState);
-		// odd -> even
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(18) , evenState);
-		// even -> odd
-		dispatchThenProcessEventAndCheckActiveState(new FeedNumberEvent(15) , oddState);
+		eventDispatcher.dispatchAndAssertCurrentState(new FeedNumberEvent(15) , oddState);
 	}
 }
