@@ -5,18 +5,14 @@ import static org.mockito.Mockito.*;
 import static org.hamcrest.core.StringContains.*;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.junit.rules.ExpectedException;
 import org.moomin.statemachine.idleactive.ActiveState;
 import org.moomin.statemachine.idleactive.ActiveStateWithDoActionBehaviour;
 import org.moomin.statemachine.idleactive.IdleState;
@@ -74,7 +70,7 @@ import org.moomin.statemachine.taskrouter.WaitForTaskState;
  *  	e.g. JunctionTest, ChoiceTest etc. Start using Mockito:)
  */
 @RunWith(MockitoJUnitRunner.class)
-public class StateMachineTest {
+public class StateMachineTest extends StateMachineTestBase {
 
 	private abstract class JunctionStateTestTemplate extends OddEvenStateMachineJunctionStateTest {
 
@@ -116,19 +112,6 @@ public class StateMachineTest {
 	}
 
 	
-	private StateMachine stateMachine;
-	private Region stateMachineRegion;
-
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
-	
-	@Before
-	public void setUp() throws Exception {
-		stateMachine = new StateMachine();
-		stateMachineRegion = new RegionStateMachine(stateMachine);
-		stateMachine.addRegion(stateMachineRegion);
-	}
-
 	@Test
 	public void activateDeactivateTest() {
 		State offState = addState(spy(State.class));
@@ -987,104 +970,6 @@ public class StateMachineTest {
 		exception.expectMessage(containsString("choice state must have at least one guard evaluating to true"));
 
 		dispatchThenProcessEventAndCheckActiveState(new TaskReceivedEvent(), node1State);
-	}
-	
-	private State addSubstate(Region owningRegion, State substate) {
-		owningRegion.addState(substate);
-		return substate;
-	}
-	
-
-	private State addState(State state) {
-		stateMachineRegion.addState(state);
-		return state;
-	}
-	
-	private SimpleCompositeState addSimpleCompositeState(SimpleCompositeState state) {
-		return (SimpleCompositeState) addState(state);
-	}
-	
-	private void addTransition(Transition transition) {
-		stateMachineRegion.addTransition(transition);
-	}
-	
-	private Transition addTransition(State source, State target, Class<? extends Event> triggerableBy) {
-		Transition transition = new Transition(source, target, triggerableBy);
-		stateMachineRegion.addTransition(transition);
-		return transition;
-	}
-
-	private void addTransition(State source, State target, Collection<Class<? extends Event>> triggerableBy) {
-		stateMachineRegion.addTransition(
-				new Transition(source, target, triggerableBy));
-	}
-	
-	private void addTransition(State source, State target, Class<? extends Event> triggerableBy, TransitionEffect effect) {
-		stateMachineRegion.addTransition(
-				new Transition(source, target, triggerableBy, effect));
-	}
-
-	private void addTransition(State source, State target, Collection<Class<? extends Event>> triggerableBy, TransitionEffect effect) {
-		stateMachineRegion.addTransition(
-				new Transition(source, target, triggerableBy, effect));
-	}
-	
-	private void addTransition(State source, State target, Class<? extends Event> triggerableBy, TransitionGuard guard) {
-		stateMachineRegion.addTransition(new Transition(source, target, triggerableBy, guard));
-	}
-	
-	private void addTransition(State source, State target, Set<Class<? extends Event>> triggerableBy, TransitionGuard guard) {
-		stateMachineRegion.addTransition(new Transition(source, target, triggerableBy, guard));
-	}
-	
-	private CompletionTransition addCompletionTransition(State source, State target) {
-		CompletionTransition completionTransition = new CompletionTransition(source, target);
-		stateMachineRegion.addTransition(completionTransition);
-		return completionTransition;
-	}
-
-	private void addCompletionTransition(State source, State target, TransitionGuard guard) {
-		stateMachineRegion.addTransition(
-				new CompletionTransition(source, target, guard));
-		
-	}
-	
-	private void addCompletionTransition(State source, State target, TransitionEffect effect) {
-		stateMachineRegion.addTransition(
-				new CompletionTransition(source, target, effect));
-		
-	}
-	
-	private void addCompletionTransition(State source, State target, TransitionGuard guard, TransitionEffect effect) {
-		stateMachineRegion.addTransition(
-				new CompletionTransition(source, target, guard, effect));
-	}
-	
-	private void setInitialTransitionAndActivate(State initialState) {
-		setInitialTransition(
-				initialState,
-				new TransitionEffect() {
-						@Override
-						public void execute() {
-							// empty on purpose
-						}
-				});
-		stateMachine.activate();
-	}
-	
-	private void setInitialTransition(State target, TransitionEffect effect) {
-		stateMachineRegion.setInitialTransition(new PrimitiveTransition(target, effect));
-	}
-	
-	private void dispatchThenProcessEventAndCheckActiveState(Event event, State expectedState) {
-		stateMachine.dispatchEvent(event);
-		stateMachine.processEvent();
-		assertSame(expectedState, stateMachineRegion.activeState());
-	}
-	
-	private void dispatchTwiceThenProcessAndCheckActiveState(Event event, State expectedActiveState) {
-		stateMachine.dispatchEvent(event);
-		dispatchThenProcessEventAndCheckActiveState(event, expectedActiveState);
 	}
 	
 }
