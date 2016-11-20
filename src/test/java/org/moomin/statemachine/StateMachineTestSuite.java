@@ -6,14 +6,16 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 
 @Suite.SuiteClasses({
-   StateMachineTest.class,
-   SimpleStateCompletionTransitionTest.class,
-   TransitionsStateMachineTest.class,
-   JunctionStateStateMachineTest.class,
-   ActivatableStateMachineTest.class,
-   StateMachineCreationTest.class,
-   EventHandlingStateMachineTest.class,
-   StateBehaviourStateMachineTest.class
+	StateMachineCreationTest.class,
+	SimpleStateCompletionTransitionTest.class,
+	TransitionsStateMachineTest.class,
+	EventHandlingStateMachineTest.class,
+	StateBehaviourStateMachineTest.class,
+	ActivatableStateMachineTest.class,
+	JunctionStateStateMachineTest.class,
+	ChoiceStateStateMachineTest.class,
+	SimpleCompositeStateStateMachineTest.class,
+	ContainingStateMachineTest.class
 })
 public class StateMachineTestSuite {
 	// empty on purpose
