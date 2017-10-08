@@ -39,7 +39,7 @@ pipeline {
     post {
         always {
 	    // archive produced jar
-            archivi 'target/*.jar'
+            archive 'target/*.jar'
 	    // archive site with all the reports
  	    archive 'target/site/**/*'
 	    // generate special junit report
