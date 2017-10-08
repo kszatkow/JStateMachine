@@ -15,9 +15,9 @@ pipeline {
 
         stage('Unit tests') {
             steps {
-		# run unit tests
+		// run unit tests
                 sh 'mvn -B -Dmaven.test.failure.ignore=true test'
-		# generate unit tests reports
+		// generate unit tests reports
 		sh 'mvn -B -DgenerateReport=false surefire-report:report site'
             }
         }
