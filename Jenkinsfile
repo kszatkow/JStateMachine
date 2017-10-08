@@ -25,9 +25,6 @@ pipeline {
 
 	stage('SonarQube analysis') {
     	    steps {
-		sh 'sudo apt-get update'
-		sh 'sudo apt-get install net-tools'
-		sh 'ifconfig'
 		sh 'ping 172.17.0.1'
 		sh 'ping 172.17.0.2'
 		curl '172.17.0.1:9000'
