@@ -39,9 +39,11 @@ pipeline {
     post {
         always {
 	    // archive produced jar
-            archive target/*.jar
+            archivi 'target/*.jar'
 	    // archive site with all the reports
- 	    archive target/site/**/*
+ 	    archive 'target/site/**/*'
+	    // generate special junit report
+	    junit 'target/surefire-reports/**/*.xml'
         }
     }
                                                                                          
