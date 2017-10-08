@@ -10,7 +10,6 @@ pipeline {
     stages {
         stage('Build jar') {
             steps {
-		sh 'whoami'
                 sh 'mvn -B -DskipTests=true clean package'
             }
         }
@@ -26,8 +25,8 @@ pipeline {
 
 	stage('SonarQube analysis') {
     	    steps {
-		sh 'apt-get update'
-		sh 'apt-get install net-tools'
+		sh 'sudo apt-get update'
+		sh 'sudo apt-get install net-tools'
 		sh 'ifconfig'
 		sh 'ping 172.17.0.1'
 		sh 'ping 172.17.0.2'
