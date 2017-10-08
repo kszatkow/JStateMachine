@@ -10,6 +10,7 @@ pipeline {
     stages {
         stage('Build jar') {
             steps {
+		sh 'whoami'
                 sh 'mvn -B -DskipTests=true clean package'
             }
         }
