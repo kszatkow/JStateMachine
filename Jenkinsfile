@@ -25,8 +25,8 @@ pipeline {
 
 	stage('SonarQube analysis') {
     	    steps {
-		sh 'ping 172.17.0.1'
-		sh 'ping 172.17.0.2'
+		sh 'ping -c 4 172.17.0.1'
+		sh 'ping -c 4 172.17.0.2'
 		curl '172.17.0.1:9000'
 		curl '172.17.0.2:9000'
 		withSonarQubeEnv('Local sonar') {
