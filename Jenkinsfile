@@ -37,8 +37,11 @@ pipeline {
     }
 
     post {
-        success {
-            echo 'Build successful!:)'
+        always {
+	    // archive produced jar
+            archive target/*.jar
+	    // archive site with all the reports
+ 	    archive target/site/**/*
         }
     }
                                                                                          
