@@ -25,6 +25,11 @@ pipeline {
 
 	stage('SonarQube analysis') {
     	    steps {
+		sh 'ifconfig'
+		sh 'ping 172.17.0.1'
+		sh 'ping 172.17.0.2'
+		curl '172.17.0.1:9000'
+		curl '172.17.0.2:9000'
 		withSonarQubeEnv('Local sonar') {
                     // requires SonarQube Scanner for Maven 3.2+
                     sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar'
